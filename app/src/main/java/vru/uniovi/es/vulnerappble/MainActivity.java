@@ -1,6 +1,7 @@
 package vru.uniovi.es.vulnerappble;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -46,12 +47,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (w.getId()) {
             case R.id.moto_card:
                 b = 1;
+                carCard.setBackgroundColor(Color.WHITE);
+                pedesCard.setBackgroundColor(Color.WHITE);
+                motoCard.setBackgroundColor(Color.GRAY);
                 break;
             case R.id.car_card:
                 b = 2;
+                motoCard.setBackgroundColor(Color.WHITE);
+                pedesCard.setBackgroundColor(Color.WHITE);
+                carCard.setBackgroundColor(Color.GRAY);
                 break;
             case R.id.pedes_card:
                 b = 3;
+                carCard.setBackgroundColor(Color.WHITE);
+                motoCard.setBackgroundColor(Color.WHITE);
+                pedesCard.setBackgroundColor(Color.GRAY);
                 break;
             case R.id.start_button:
                 if (b == 0) {
@@ -66,6 +76,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             default:
                 break;
         }
+
+    }
+    public void set_backgroundcard(View v){
 
     }
 
