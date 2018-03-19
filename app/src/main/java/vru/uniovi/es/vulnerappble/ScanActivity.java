@@ -1,12 +1,16 @@
 package vru.uniovi.es.vulnerappble;
 
 import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class ScanActivity extends AppCompatActivity {
-private TextView mostrarDatos;
+    private TextView mostrarDatos;
+    private FloatingActionButton backButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +36,16 @@ private TextView mostrarDatos;
             // Se puede hacer la asignación directamente:
             mostrarDatos.setText(getIntent().getExtras().getString("datos"));
         }
+
+        backButton= (FloatingActionButton) findViewById(R.id.fab);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ScanActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
     }
 }

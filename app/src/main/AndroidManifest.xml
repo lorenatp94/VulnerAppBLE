@@ -6,6 +6,12 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!-- permisos de Bluetooth -->
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <!-- Para que la app solo la puedan usar disponitivos que soorten BLE -->
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
+
 
     <application
         android:allowBackup="true"
