@@ -15,6 +15,9 @@ public class ScanActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan);
+        //Icono en ActionBar
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.mipmap.ic_launcher_round);
 
         mostrarDatos = (TextView) findViewById(R.id.mostrarDatos);
         //Sacamos el intent con el que se inició la activity
