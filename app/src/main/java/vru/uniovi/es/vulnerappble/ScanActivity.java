@@ -30,14 +30,30 @@ public class ScanActivity extends AppCompatActivity {
         // excepción por intentar un objeto que no existe
         // (NullPointerException).
         if (b != null) {
-            String datos = b.getString("datos");
+            String UsrType = b.getString("usr");
+            // Establecemos el texto del TextView a partir de la cadena de texto
+            // que hemos sacado del Bundle.
+            switch(UsrType){
+                case "1":
+                    mostrarDatos.setText("Usuario motorista");
+                    break;
+                case "2":
+                    mostrarDatos.setText("Usuario en coche");
+                    break;
+                case "3":
+                    mostrarDatos.setText("Usuario peatón");
+                    break;
+                default:
+                    System.out.println("Error");
+            }
+
 
             // Establecemos el texto del TextView a partir de la cadena de texto
             // que hemos sacado del Bundle.
-            mostrarDatos.setText(datos);
+
 
             // Se puede hacer la asignación directamente:
-            mostrarDatos.setText(getIntent().getExtras().getString("datos"));
+            //mostrarDatos.setText(getIntent().getExtras().getString("datos"));
         }
 
         backButton= (FloatingActionButton) findViewById(R.id.fab);

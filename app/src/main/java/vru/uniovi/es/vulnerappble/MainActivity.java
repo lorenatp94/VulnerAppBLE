@@ -19,9 +19,8 @@ import static android.R.attr.button;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private CardView motoCard, carCard, pedesCard;
     private Button startButton;
-    public int b;
     private BluetoothAdapter mBluetoothAdapter;
-
+    public String UsrType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,30 +70,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }*/
         switch (w.getId()) {
             case R.id.moto_card:
-                b = 1;
+                UsrType = "1";
                 carCard.setBackgroundColor(Color.WHITE);
                 pedesCard.setBackgroundColor(Color.WHITE);
                 motoCard.setBackgroundColor(Color.GRAY);
                 break;
             case R.id.car_card:
-                b = 2;
+                UsrType = "2";
                 motoCard.setBackgroundColor(Color.WHITE);
                 pedesCard.setBackgroundColor(Color.WHITE);
                 carCard.setBackgroundColor(Color.GRAY);
                 break;
             case R.id.pedes_card:
-                b = 3;
+                UsrType= "3";
                 carCard.setBackgroundColor(Color.WHITE);
                 motoCard.setBackgroundColor(Color.WHITE);
                 pedesCard.setBackgroundColor(Color.GRAY);
                 break;
             case R.id.start_button:
-                if (b == 0) {
+                if (UsrType.equals("0")) {
                     Snackbar.make(w, "Please choose an option", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 } else {
-                    b=0;
+
+                    // Utilizamos un objeto de la clase Bundle para incluir un par
+                    // "Clave/Valor", este objeto tendrá como clave "datos", y su valor
+                    // será el tipo de usuario
+                    Bundle b = new Bundle();
+                    b.putString("usr", UsrType.toString());
+                    UsrType="0"; //Para cuando se vueva al menú
+
+                    // La clase Intent establece un link entre esta Activity y la nueva
+                    // que queremos lanzar, para ello al instanciar el Intent
+                    // introducimos como parámetros esta propia Activity, y la clase que
+                    // representa a la nueva Activity.
                     Intent intent = new Intent(MainActivity.this, ScanActivity.class);
+                    intent.putExtras(b);
                     startActivity(intent);
 
                 }
