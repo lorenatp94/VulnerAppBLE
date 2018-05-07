@@ -42,6 +42,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pedesCard.setOnClickListener(this);
         startButton.setOnClickListener(this);
 
+
+
+     }
+
+    @Override
+    public void onResume(){
+        super.onResume();
         // Initializes Bluetooth adapter.
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -53,9 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, 5);
         }
-
-
-     }
+    }
 
     @Override
     public void onClick(View w){
