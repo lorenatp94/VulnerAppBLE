@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,13 +11,10 @@ import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
-
-import static android.R.attr.button;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private CardView motoCard, carCard, pedesCard;
-    private Button startButton;
+    private Button nextButton;
     private BluetoothAdapter mBluetoothAdapter;
     public String UsrType;
 
@@ -34,13 +30,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         motoCard=(CardView) findViewById(R.id.moto_card);
         carCard=(CardView) findViewById(R.id.car_card);
         pedesCard=(CardView) findViewById(R.id.pedes_card);
-        startButton= (Button) findViewById(R.id.start_button);
+        nextButton = (Button) findViewById(R.id.next_button);
 
         //Se añade función al boton y a las card
         motoCard.setOnClickListener(this);
         carCard.setOnClickListener(this);
         pedesCard.setOnClickListener(this);
-        startButton.setOnClickListener(this);
+        nextButton.setOnClickListener(this);
 
 
 
@@ -60,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, 5);
         }
+        UsrType= "0";
     }
 
     @Override
@@ -92,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 motoCard.setBackgroundColor(Color.WHITE);
                 pedesCard.setBackgroundColor(Color.GRAY);
                 break;
-            case R.id.start_button:
+            case R.id.next_button:
                 if (UsrType.equals("0")) {
                     Snackbar.make(w, "Please choose an option", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();

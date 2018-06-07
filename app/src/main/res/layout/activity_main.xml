@@ -144,13 +144,13 @@
         android:clipToPadding="false">
 
                <Button
-                   android:id="@+id/start_button"
+                   android:id="@+id/next_button"
                    android:layout_width="255dp"
                    android:layout_height="wrap_content"
                    android:layout_gravity="center"
                    android:layout_marginTop="50dp"
                    android:background="@color/colorPrimary"
-                   android:text="@string/action_start"
+                   android:text="@string/action_next"
                    android:textColor="@color/white"
                    android:textStyle="bold">
                 </Button>
