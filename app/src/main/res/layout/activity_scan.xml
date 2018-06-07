@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     tools:context="vru.uniovi.es.vulnerappble.ScanActivity"
     android:orientation="vertical"
-    android:gravity="center">
+    android:gravity="center"
+    android:weightSum="1">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,28 +19,71 @@
         <TextView
             android:id="@+id/mostrarDatos"
             android:layout_width="match_parent"
-            android:layout_height="336dp"
+            android:layout_height="29dp"
             android:layout_gravity="center"
             android:text="AQUÍ APARECERÁN LOS DISPOSITIVOS CERCANOS!"
             android:textStyle="bold" />
     </LinearLayout>
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="225dp"
+        android:layout_weight="0.97">
+
+
+    </ScrollView>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="194dp"
+        android:clipToPadding="false"
         android:gravity="center"
+        android:orientation="vertical">
 
-        android:orientation="vertical"
-        android:clipToPadding="false">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/stop_scanning_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginRight="1dp"
+                android:background="@color/colorPrimary"
+                android:text="@string/action_stop"
+                android:textColor="@color/cardview_light_background" />
+
+            <Button
+                android:id="@+id/start_scanning_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginRight="1dp"
+                android:background="@color/colorPrimary"
+                android:text="@string/action_start"
+                android:textColor="@color/cardview_light_background" />
+
+            <Button
+                android:id="@+id/clear_scanning_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/colorPrimary"
+                android:text="@string/action_clear"
+                android:textColor="@color/cardview_light_background" />
+
+        </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="50dp"
-            android:layout_height="500dp"
+            android:layout_height="50dp"
             android:layout_gravity="bottom|end|center_horizontal|right"
-            android:layout_margin="40dp"
+            android:layout_margin="10dp"
             android:layout_marginBottom="10dp"
-            android:src="@drawable/ic_arrow_back_black_24dp"/>
+            android:src="@drawable/ic_arrow_back_black_24dp" />
 
     </LinearLayout>
 </LinearLayout>
