@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -38,6 +37,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pedesCard.setOnClickListener(this);
         nextButton.setOnClickListener(this);
 
+        carCard.setFocusableInTouchMode(true);
+        pedesCard.setFocusableInTouchMode(true);
+        motoCard.setFocusableInTouchMode(true);
+
 
 
      }
@@ -64,31 +67,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //objeto Bunlde que incluye el par "Clave/Valor"
         //la clave será "user" y el texto dependerá de la opción escogida
 
-        /*switch (w.getId()){
-            case R.id.moto_card: b.putString("user", "moto");break;
-            case R.id.car_card:b.putString("user", "car");break;
-            case R.id.pedes_card:b.putString("user", "car");break;
-            default: break;
-        }*/
+
         switch (w.getId()) {
             case R.id.moto_card:
                 UsrType = "1";
-                carCard.setBackgroundColor(Color.WHITE);
-                pedesCard.setBackgroundColor(Color.WHITE);
-                motoCard.setBackgroundColor(Color.GRAY);
                 break;
+
             case R.id.car_card:
                 UsrType = "2";
-                motoCard.setBackgroundColor(Color.WHITE);
-                pedesCard.setBackgroundColor(Color.WHITE);
-                carCard.setBackgroundColor(Color.GRAY);
                 break;
+
             case R.id.pedes_card:
                 UsrType= "3";
-                carCard.setBackgroundColor(Color.WHITE);
-                motoCard.setBackgroundColor(Color.WHITE);
-                pedesCard.setBackgroundColor(Color.GRAY);
                 break;
+
             case R.id.next_button:
                 if (UsrType.equals("0")) {
                     Snackbar.make(w, "Please choose an option", Snackbar.LENGTH_LONG)
@@ -106,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     // que queremos lanzar, para ello al instanciar el Intent
                     // introducimos como parámetros esta propia Activity, y la clase que
                     // representa a la nueva Activity.
-                    Intent intent = new Intent(MainActivity.this, ScanActivity.class);
+                    Intent intent = new Intent(MainActivity.this, ClientActivity.class);
                     intent.putExtras(b);
                     startActivity(intent);
 
