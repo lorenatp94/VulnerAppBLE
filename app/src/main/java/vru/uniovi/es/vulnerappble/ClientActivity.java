@@ -17,7 +17,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.os.Handler;
 
@@ -30,8 +32,11 @@ import java.util.Map;
 public class ClientActivity extends AppCompatActivity {
 
     private static final String TAG = "ClientActivity";
+
     private TextView userType;
-    private TextView deviceList;
+    private ListView deviceList;
+    ArrayList<String> arrayList;
+    ArrayAdapter<String> adapter;
     private FloatingActionButton mapButton;
     private Button startButton, stopButton, clearButton;
 
@@ -60,7 +65,11 @@ public class ClientActivity extends AppCompatActivity {
         getSupportActionBar().setIcon(R.mipmap.ic_launcher_round);
 
         userType = (TextView) findViewById(R.id.userType);
-        deviceList= (TextView) findViewById(R.id.deviceList);
+        deviceList= (ListView) findViewById(R.id.deviceList);
+
+        arrayList=new ArrayList<String>();
+        adapter = new ArrayAdapter<String>(ClientActivity.this, android.R.layout.simple_expandable_list_item_1,arrayList);
+
         //Sacamos el intent con el que se inició la activity
         Intent i= getIntent();
         //Del intent sacamos el bundle
@@ -88,18 +97,18 @@ public class ClientActivity extends AppCompatActivity {
                     System.out.println("Error");
             }
 
-
-            // Establecemos el texto del TextView a partir de la cadena de texto
-            // que hemos sacado del Bundle.
-
-
             // Se puede hacer la asignación directamente:
             //mostrarDatos.setText(getIntent().getExtras().getString("datos"));
+
+            //Inicialización adaptador Bluetooth
             BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
             mBluetoothAdapter = bluetoothManager.getAdapter();
         }
 
+        //Botones
+
         mapButton = (FloatingActionButton) findViewById(R.id.fab);
+        mapButton.setFocusableInTouchMode(true);
         mapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,6 +118,7 @@ public class ClientActivity extends AppCompatActivity {
         });
 
         startButton= (Button) findViewById(R.id.start_scanning_button);
+        startButton.setFocusableInTouchMode(true);
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,6 +127,7 @@ public class ClientActivity extends AppCompatActivity {
         });
 
         stopButton= (Button) findViewById(R.id.stop_scanning_button);
+        stopButton.setFocusableInTouchMode(true);
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,10 +136,11 @@ public class ClientActivity extends AppCompatActivity {
         });
 
         clearButton= (Button) findViewById(R.id.clear_scanning_button);
+        clearButton.setFocusableInTouchMode(true);
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                clearList();
             }
         });
 
@@ -139,6 +151,8 @@ public class ClientActivity extends AppCompatActivity {
             return;
         }
 
+        deviceList.setAdapter(adapter);
+
         List<ScanFilter> filters = new ArrayList<>();
         ScanSettings settings =new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).build();
@@ -148,8 +162,8 @@ public class ClientActivity extends AppCompatActivity {
         mScanCallback = new BleScanCallback(mScanResults);
         //BluetoothLeScanner inicia el escaneo y pone el booleano a true
         mBluetoothLeScanner  = mBluetoothAdapter.getBluetoothLeScanner();
-        mBluetoothLeScanner.startScan(filters, settings, mScanCallback);
-        mScanning = true;
+        //mBluetoothLeScanner.startScan(filters, settings, mScanCallback);
+        mBluetoothLeScanner.startScan(mScanCallback);
         //Handler para parar el escaneo tras un tiempo en milisegundos
         mHandler = new Handler();
         mHandler.postDelayed(new Runnable() {
@@ -158,6 +172,9 @@ public class ClientActivity extends AppCompatActivity {
                 stopScan();
             }
         }, SCAN_PERIOD);
+        mScanning = true;mScanning = true;
+        Log.d(TAG, "Started scanning.");
+
 
     }//startScan
 
@@ -177,12 +194,7 @@ public class ClientActivity extends AppCompatActivity {
         Log.d(TAG, "Requested user enables Bluetooth. Try starting the scan again.");
 
     }
-   /* private boolean hasLocationPermissions() {
-        return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-    }
-    private void requestLocationPermission() {
-        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
-    }*/
+
 
 
     private void stopScan(){
@@ -195,19 +207,35 @@ public class ClientActivity extends AppCompatActivity {
         mScanCallback = null;
         mScanning = false;
         mHandler = null;
+
+        Log.d(TAG, "Stopped scanning.");
     }//stopScan
+
+    private void clearList(){
+        deviceList.setAdapter(null);
+        mScanResults.clear();
+        arrayList.clear();
+    }
 
     private void scanComplete() {
         //Realizará cualquier acción usando los resultados
         //Por ahora simlemente se desconectará de los dispositivos encontrados durante el escaneo
 
         if (mScanResults.isEmpty()) {
+            Log.d(TAG, "No se encuentran dispositivos.");
+            String mensaje= "No se encuentran dispositivos";
+            arrayList.add(mensaje);
+            adapter.notifyDataSetChanged();
+
             return;
         }
         for (String deviceAddress : mScanResults.keySet()) {
             //Se saca por pantalla cada devideAddres contenida en el mapa
             Log.d(TAG, "Found device: " + deviceAddress);
             //deviceList.setText("Found device: " + deviceAddress);
+            arrayList.add(deviceAddress);
+            adapter.notifyDataSetChanged();
+
         }
     }//scanComplete
 
@@ -239,7 +267,8 @@ public class ClientActivity extends AppCompatActivity {
             BluetoothDevice device = result.getDevice();
             String deviceAddress = device.getAddress();
             mScanResults.put(deviceAddress, device);
-            deviceList.setText("Found device: " + deviceAddress + "\r\n");
+
+
         }
     }//BleScanCallBack
 
