@@ -2,25 +2,27 @@
     <string name="app_name">VulnerAppBLE</string>
 
 
-
-
     <string name="action_start">START</string>
     <string name="action_next">NEXT</string>
     <string name="action_stop">STOP</string>
     <string name="action_discon">DISCONNECT</string>
+    <string name="action_connect">CONNECT</string>
     <string name="action_clear">CLEAR</string>
-    <string name="ble_servers">BLE SERVERS</string> ble_servers
-    <string name="moto">Motorist</string>
+    <string name="ble_servers">BLE SERVERS</string>
+    <string name="action_advertise">ADVERTISE</string>
+    <string name="moto">Motorist/Cyclist</string>
     <string name="car">Car</string>
     <string name="walk">Pedestrian</string>
     <string name="messages">Messages</string>
+
+
+    <string name = "serverAd"> Server Address: %s </string>
 
     <!-- Logs -->
 
     <string name="logs">Logs</string>
     <string name="clear">Clear</string>
-
-
+    <string name="title_activity_maps">Map</string>
 
 
 </resources>

@@ -1,10 +1,13 @@
 package vru.uniovi.es.vulnerappble;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
@@ -12,6 +15,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.ParcelUuid;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,11 +31,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 
 public class ClientActivity extends AppCompatActivity {
 
     private static final String TAG = "ClientActivity";
+    public static String SERVICE_STRING = "5377e081-74a8-4e92-86c1-ec474ec11d61";
+    public static UUID SERVICE_UUID = UUID.fromString(SERVICE_STRING);
 
     private TextView userType;
     private ListView deviceList;
@@ -53,7 +60,7 @@ public class ClientActivity extends AppCompatActivity {
     private ScanCallback mScanCallback;
     private BluetoothGatt mGatt;
 
-    public static final long SCAN_PERIOD = 100000;
+    public static final long SCAN_PERIOD = 50000;
 
 
     @Override
@@ -85,7 +92,7 @@ public class ClientActivity extends AppCompatActivity {
             // que hemos sacado del Bundle.
             switch(UsrType){
                 case "1":
-                    userType.setText("Usuario motorista");
+                    userType.setText("Usuario motorista/ciclista");
                     break;
                 case "2":
                     userType.setText("Usuario en coche");
@@ -144,6 +151,7 @@ public class ClientActivity extends AppCompatActivity {
             }
         });
 
+
     }//OnCreate
 
     private void startScan(){
@@ -151,20 +159,30 @@ public class ClientActivity extends AppCompatActivity {
             return;
         }
 
+
         deviceList.setAdapter(adapter);
 
         List<ScanFilter> filters = new ArrayList<>();
+        //Añadimos filtro para el UUID del servicio de servidor Gatt
+        /*ScanFilter scanFilter = new ScanFilter.Builder()
+                .setServiceUuid(new ParcelUuid(SERVICE_UUID))
+                .build();
+        filters.add(scanFilter);*/
         ScanSettings settings =new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).build();
-    //ScanCallback para manejar los resutados y se añade un mapa para guardarlos
+
+        //BtleScanCallback para manejar los resutados y se añade un mapa para guardarlos
 
         mScanResults=new HashMap<>();
         mScanCallback = new BleScanCallback(mScanResults);
         //BluetoothLeScanner inicia el escaneo y pone el booleano a true
         mBluetoothLeScanner  = mBluetoothAdapter.getBluetoothLeScanner();
-        //mBluetoothLeScanner.startScan(filters, settings, mScanCallback);
-        mBluetoothLeScanner.startScan(mScanCallback);
+        mBluetoothLeScanner.startScan(filters, settings, mScanCallback);
+        //mBluetoothLeScanner.startScan(mScanCallback);
+
+        Log.d(TAG, "Started scanning.");
         //Handler para parar el escaneo tras un tiempo en milisegundos
+        mScanning = true;
         mHandler = new Handler();
         mHandler.postDelayed(new Runnable() {
             public void run() {
@@ -172,8 +190,8 @@ public class ClientActivity extends AppCompatActivity {
                 stopScan();
             }
         }, SCAN_PERIOD);
-        mScanning = true;mScanning = true;
-        Log.d(TAG, "Started scanning.");
+
+
 
 
     }//startScan
@@ -264,13 +282,47 @@ public class ClientActivity extends AppCompatActivity {
         }
 
         private void addScanResult(ScanResult result) {
+
             BluetoothDevice device = result.getDevice();
             String deviceAddress = device.getAddress();
             mScanResults.put(deviceAddress, device);
-
+            /*stopScan();
+            BluetoothDevice bluetoothDevice = scanResult.getDevice();
+            connectDevice(bluetoothDevice);*/
 
         }
     }//BleScanCallBack
+
+    private void connectDevice(BluetoothDevice device) {
+        GattClientCallback gattClientCallback = new GattClientCallback();
+        mGatt = device.connectGatt(this, false, gattClientCallback);
+    }
+    private class GattClientCallback extends BluetoothGattCallback {
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState){
+            super.onConnectionStateChange(gatt, status, newState);
+            if(status == BluetoothGatt.GATT_FAILURE){
+                disconnectGattServer();
+                return;
+            } else if (status != BluetoothGatt.GATT_SUCCESS){
+                disconnectGattServer();
+                return;
+            }
+            if (newState== BluetoothProfile.STATE_CONNECTED){
+                mConnected=true;
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED){
+                disconnectGattServer();
+            }
+        }
+    }//GatClientCallback
+
+    public void disconnectGattServer(){
+        mConnected =false;
+        if(mGatt != null){
+            mGatt.disconnect();
+            mGatt.close();
+        }
+    } //disconnectGattServer
 
 
 }
