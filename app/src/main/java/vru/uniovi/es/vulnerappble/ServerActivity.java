@@ -1,5 +1,6 @@
 package vru.uniovi.es.vulnerappble;
 
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattServer;
@@ -11,8 +12,10 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.support.v7.app.AppCompatActivity;
@@ -40,6 +43,8 @@ public class ServerActivity extends AppCompatActivity {
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
 
+    private ProgressDialog dialog;
+
   /*  mBinding = DataBindingUtil.setContentView(this, R.layout.activity_server);
     mBinding.restartServerButton.setOnClickListener(v -> restartServer());
     mBinding.viewServerLog.clearLogButton.setOnClickListener(v -> clearLogs());
@@ -52,6 +57,8 @@ public class ServerActivity extends AppCompatActivity {
         mBluetoothAdapter = mBluetoothManager.getAdapter();
 
         serverAddres = (TextView) findViewById(R.id.serverAddres);
+
+
     }//onCreate
 
     @Override
@@ -174,5 +181,26 @@ public class ServerActivity extends AppCompatActivity {
             mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
         }
     }
+
+   /* private class ServerTask extends AsyncTask <Void, Float, String>{
+
+        protected void onPreExecute(){
+            dialog.setProgress(0);
+            dialog.setMax(100);
+            dialog.show();
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+            Context cont= getApplicationContext();
+            String macAddress = android.provider.Settings.Secure.getString(cont.getContentResolver(), "bluetooth_address");
+            return macAddress;
+        }
+
+        protected void onProgressUpdate(Float... percent){
+            int p =Math.round(100*percent[0]);
+            dialog.setProgress(p);
+        }
+    }//Asynctask*/
 
 }

@@ -15,6 +15,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.ParcelUuid;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.os.Handler;
 
@@ -47,6 +49,8 @@ public class ClientActivity extends AppCompatActivity {
     private FloatingActionButton mapButton;
     private Button startButton, stopButton, clearButton;
 
+    int count=1;
+
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_FINE_LOCATION = 2;
     private boolean mScanning;
@@ -59,6 +63,11 @@ public class ClientActivity extends AppCompatActivity {
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
     private BluetoothGatt mGatt;
+    private ProgressBar mProgressBar;
+
+    private TextView mProgressText;
+
+
 
     public static final long SCAN_PERIOD = 50000;
 
@@ -67,12 +76,17 @@ public class ClientActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client);
+
         //Icono en ActionBar
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.mipmap.ic_launcher_round);
 
-        userType = (TextView) findViewById(R.id.userType);
-        deviceList= (ListView) findViewById(R.id.deviceList);
+        userType = (TextView) findViewById(R.id.userType); //Tipo de usuario
+        deviceList= (ListView) findViewById(R.id.deviceList); //Lista de dispositivos
+        mProgressBar = (ProgressBar) findViewById(R.id.progressbar); //ProgressBar
+        mProgressBar.setVisibility(View.INVISIBLE);
+
+        mProgressText=(TextView) findViewById(R.id.progresstext); //Progress Text
 
         arrayList=new ArrayList<String>();
         adapter = new ArrayAdapter<String>(ClientActivity.this, android.R.layout.simple_expandable_list_item_1,arrayList);
@@ -129,7 +143,9 @@ public class ClientActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startScan();
+                //startScan();
+
+                new ScanTask().execute();
             }
         });
 
@@ -154,11 +170,28 @@ public class ClientActivity extends AppCompatActivity {
 
     }//OnCreate
 
+    private boolean hasPermissions() {
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            requestBluetoothEnable();
+            return false;
+        } else /*if (!hasLocationPermissions()) {
+            requestLocationPermission();
+            return false;
+        }*/
+            return true;
+    }
+    private void requestBluetoothEnable() {
+        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        Log.d(TAG, "Requested user enables Bluetooth. Try starting the scan again.");
+
+    }
+
+
     private void startScan(){
         if (!hasPermissions() || mScanning) {
             return;
         }
-
 
         deviceList.setAdapter(adapter);
 
@@ -175,7 +208,8 @@ public class ClientActivity extends AppCompatActivity {
 
         mScanResults=new HashMap<>();
         mScanCallback = new BleScanCallback(mScanResults);
-        //BluetoothLeScanner inicia el escaneo y pone el booleano a true
+
+        //BluetoothLeScanner inicia el escaneo
         mBluetoothLeScanner  = mBluetoothAdapter.getBluetoothLeScanner();
         mBluetoothLeScanner.startScan(filters, settings, mScanCallback);
         //mBluetoothLeScanner.startScan(mScanCallback);
@@ -191,32 +225,15 @@ public class ClientActivity extends AppCompatActivity {
             }
         }, SCAN_PERIOD);
 
-
-
-
     }//startScan
 
-    private boolean hasPermissions() {
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            requestBluetoothEnable();
-            return false;
-        } else /*if (!hasLocationPermissions()) {
-            requestLocationPermission();
-            return false;
-        }*/
-        return true;
-    }
-    private void requestBluetoothEnable() {
-        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        Log.d(TAG, "Requested user enables Bluetooth. Try starting the scan again.");
-
-    }
 
 
 
     private void stopScan(){
-        //Para detener el escaneo usamos el mismo ScanCallback de antes.  Ahora es buen momento para limpiar cualquier variable relacionada con el escaneo.
+        //Para detener el escaneo usamos el mismo ScanCallback de antes.
+        // Se limpian variables relacionadas con el escaneo
+        mProgressBar.setVisibility(View.INVISIBLE);
         if (mScanning && mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && mBluetoothLeScanner != null) {
             mBluetoothLeScanner.stopScan(mScanCallback);
             scanComplete();
@@ -227,13 +244,8 @@ public class ClientActivity extends AppCompatActivity {
         mHandler = null;
 
         Log.d(TAG, "Stopped scanning.");
-    }//stopScan
 
-    private void clearList(){
-        deviceList.setAdapter(null);
-        mScanResults.clear();
-        arrayList.clear();
-    }
+    }//stopScan
 
     private void scanComplete() {
         //Realizará cualquier acción usando los resultados
@@ -247,15 +259,28 @@ public class ClientActivity extends AppCompatActivity {
 
             return;
         }
-        for (String deviceAddress : mScanResults.keySet()) {
+        for (String device : mScanResults.keySet()) {
             //Se saca por pantalla cada devideAddres contenida en el mapa
-            Log.d(TAG, "Found device: " + deviceAddress);
+            Log.d(TAG, "Found device: " + device);
             //deviceList.setText("Found device: " + deviceAddress);
-            arrayList.add(deviceAddress);
+            arrayList.add(device);
             adapter.notifyDataSetChanged();
 
         }
     }//scanComplete
+
+    private void clearList(){
+        deviceList.setAdapter(null);
+        mScanResults.clear();
+        arrayList.clear();
+    }
+
+    private void connectDevice(BluetoothDevice device) {
+        GattClientCallback gattClientCallback = new GattClientCallback();
+        mGatt = device.connectGatt(this, false, gattClientCallback);
+    }
+
+
 
     private class BleScanCallback extends ScanCallback {
         private Map<String, BluetoothDevice> mScanResults;
@@ -293,10 +318,7 @@ public class ClientActivity extends AppCompatActivity {
         }
     }//BleScanCallBack
 
-    private void connectDevice(BluetoothDevice device) {
-        GattClientCallback gattClientCallback = new GattClientCallback();
-        mGatt = device.connectGatt(this, false, gattClientCallback);
-    }
+
     private class GattClientCallback extends BluetoothGattCallback {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState){
@@ -324,5 +346,50 @@ public class ClientActivity extends AppCompatActivity {
         }
     } //disconnectGattServer
 
+    public class ScanTask extends AsyncTask<Integer, Float, String>
+    {
+        @Override
+        protected  void onPreExecute(){
+            mProgressBar.setVisibility(View.VISIBLE);
+            mProgressBar.setProgress(0);
+        }
+        @Override
+        protected String doInBackground(Integer... params) {
+            try{
+
+                //
+                startScan();
+               /* for (; count <= params[0]; count++) {
+                    Thread.sleep(1000);
+                    publishProgress((float)count);}*/
+
+
+
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        /*protected void onPreExecute(){
+            //dialog.setMessage("Loading...");
+            //dialog.setTitle("Progress");
+            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dialog.setCancelable(false);
+            dialog.setProgress(0);
+            dialog.setMax(100);
+            dialog.show();
+        }*/
+
+
+        protected void onProgressUpdate(Float... percent){
+            int p =Math.round(100*percent[0]);
+           // mProgressText.setText(""+percent[0]);
+            //mProgressBar.setProgress((float) percent[0]);
+        }
+
+    }//ScanTask
 
 }

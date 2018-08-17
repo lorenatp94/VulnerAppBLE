@@ -165,6 +165,18 @@
             android:textColor="@color/white"
             android:textStyle="bold"></Button>
 
+        <Button
+            android:id="@+id/scan_button"
+            android:layout_width="255dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="0dp"
+            android:background="@color/colorPrimary"
+            android:text="SCAN"
+            android:textColor="@color/white"
+            android:textStyle="bold"></Button>
+
+
     </LinearLayout>
 
 
