@@ -18,8 +18,11 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.ParcelUuid;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -44,6 +47,7 @@ public class ClientActivity extends AppCompatActivity {
 
     private TextView userType;
     private ListView deviceList;
+    private TextView mProgressText;
     ArrayList<String> arrayList;
     ArrayAdapter<String> adapter;
     private FloatingActionButton mapButton;
@@ -53,6 +57,8 @@ public class ClientActivity extends AppCompatActivity {
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_FINE_LOCATION = 2;
+    public static final long SCAN_PERIOD = 50000;
+
     private boolean mScanning;
     private Handler mHandler;
     private Handler mLogHandler;
@@ -65,11 +71,6 @@ public class ClientActivity extends AppCompatActivity {
     private BluetoothGatt mGatt;
     private ProgressBar mProgressBar;
 
-    private TextView mProgressText;
-
-
-
-    public static final long SCAN_PERIOD = 50000;
 
 
     @Override
@@ -82,14 +83,15 @@ public class ClientActivity extends AppCompatActivity {
         getSupportActionBar().setIcon(R.mipmap.ic_launcher_round);
 
         userType = (TextView) findViewById(R.id.userType); //Tipo de usuario
-        deviceList= (ListView) findViewById(R.id.deviceList); //Lista de dispositivos
+
+
         mProgressBar = (ProgressBar) findViewById(R.id.progressbar); //ProgressBar
-        mProgressBar.setVisibility(View.INVISIBLE);
+
 
         mProgressText=(TextView) findViewById(R.id.progresstext); //Progress Text
 
         arrayList=new ArrayList<String>();
-        adapter = new ArrayAdapter<String>(ClientActivity.this, android.R.layout.simple_expandable_list_item_1,arrayList);
+        adapter = new ArrayAdapter<String>(ClientActivity.this, android.R.layout.simple_expandable_list_item_1, arrayList);
 
         //Sacamos el intent con el que se inició la activity
         Intent i= getIntent();
@@ -106,13 +108,13 @@ public class ClientActivity extends AppCompatActivity {
             // que hemos sacado del Bundle.
             switch(UsrType){
                 case "1":
-                    userType.setText("Usuario motorista/ciclista");
+                    userType.setText("Motorist/Cyclist user");
                     break;
                 case "2":
-                    userType.setText("Usuario en coche");
+                    userType.setText("Car driver user");
                     break;
                 case "3":
-                    userType.setText("Usuario peatón");
+                    userType.setText("Pedestrian user");
                     break;
                 default:
                     System.out.println("Error");
@@ -146,6 +148,7 @@ public class ClientActivity extends AppCompatActivity {
                 //startScan();
 
                 new ScanTask().execute();
+
             }
         });
 
@@ -174,12 +177,12 @@ public class ClientActivity extends AppCompatActivity {
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             requestBluetoothEnable();
             return false;
-        } else /*if (!hasLocationPermissions()) {
-            requestLocationPermission();
-            return false;
-        }*/
+        }
+         else{
             return true;
-    }
+        }
+    }// hasPermissions
+
     private void requestBluetoothEnable() {
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -188,12 +191,10 @@ public class ClientActivity extends AppCompatActivity {
     }
 
 
-    private void startScan(){
+    public void startScan(){
         if (!hasPermissions() || mScanning) {
             return;
         }
-
-        deviceList.setAdapter(adapter);
 
         List<ScanFilter> filters = new ArrayList<>();
         //Añadimos filtro para el UUID del servicio de servidor Gatt
@@ -217,20 +218,20 @@ public class ClientActivity extends AppCompatActivity {
         Log.d(TAG, "Started scanning.");
         //Handler para parar el escaneo tras un tiempo en milisegundos
         mScanning = true;
-        mHandler = new Handler();
+       /* mHandler = new Handler();
         mHandler.postDelayed(new Runnable() {
             public void run() {
                 // Tras el SCAN_PERIOD se ejecuta stopScan para que no esté escaneando infinitamente.
                 stopScan();
             }
-        }, SCAN_PERIOD);
+        }, SCAN_PERIOD);*/
 
     }//startScan
 
 
 
 
-    private void stopScan(){
+    public void stopScan(){
         //Para detener el escaneo usamos el mismo ScanCallback de antes.
         // Se limpian variables relacionadas con el escaneo
         mProgressBar.setVisibility(View.INVISIBLE);
@@ -247,13 +248,16 @@ public class ClientActivity extends AppCompatActivity {
 
     }//stopScan
 
-    private void scanComplete() {
+    public void scanComplete() {
         //Realizará cualquier acción usando los resultados
         //Por ahora simlemente se desconectará de los dispositivos encontrados durante el escaneo
+
+
 
         if (mScanResults.isEmpty()) {
             Log.d(TAG, "No se encuentran dispositivos.");
             String mensaje= "No se encuentran dispositivos";
+            arrayList.clear();
             arrayList.add(mensaje);
             adapter.notifyDataSetChanged();
 
@@ -263,11 +267,14 @@ public class ClientActivity extends AppCompatActivity {
             //Se saca por pantalla cada devideAddres contenida en el mapa
             Log.d(TAG, "Found device: " + device);
             //deviceList.setText("Found device: " + deviceAddress);
+            arrayList.clear();
             arrayList.add(device);
             adapter.notifyDataSetChanged();
 
         }
     }//scanComplete
+
+
 
     private void clearList(){
         deviceList.setAdapter(null);
@@ -346,49 +353,76 @@ public class ClientActivity extends AppCompatActivity {
         }
     } //disconnectGattServer
 
-    public class ScanTask extends AsyncTask<Integer, Float, String>
+    public class ScanTask extends AsyncTask<Void, Void, ArrayList>
     {
         @Override
         protected  void onPreExecute(){
             mProgressBar.setVisibility(View.VISIBLE);
-            mProgressBar.setProgress(0);
-        }
+            deviceList= (ListView) findViewById(R.id.deviceList); //Lista de dispositivos
+            deviceList.setAdapter(adapter);
+    }
+
         @Override
-        protected String doInBackground(Integer... params) {
+        protected void onPostExecute(ArrayList s) {
+            mProgressBar.setVisibility(View.INVISIBLE);
+            //arrayList=new ArrayList<String>();
+            //adapter = new ArrayAdapter<String>(ClientActivity.this, android.R.layout.simple_expandable_list_item_1, arrayList);
+            scanComplete();
+
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            //progressDialog.incrementProgressBy(1);
+        }
+
+        @Override
+        protected ArrayList<String> doInBackground(Void... args) {
+
             try{
+                //startScan();
 
-                //
-                startScan();
-               /* for (; count <= params[0]; count++) {
-                    Thread.sleep(1000);
-                    publishProgress((float)count);}*/
+                List<ScanFilter> filters = new ArrayList<>();
+                //Añadimos filtro para el UUID del servicio de servidor Gatt
+        /*ScanFilter scanFilter = new ScanFilter.Builder()
+                .setServiceUuid(new ParcelUuid(SERVICE_UUID))
+                .build();
+        filters.add(scanFilter);*/
+                ScanSettings settings =new ScanSettings.Builder()
+                        .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).build();
 
+                //BtleScanCallback para manejar los resutados y se añade un mapa para guardarlos
+
+                mScanResults=new HashMap<>();
+                mScanCallback = new BleScanCallback(mScanResults);
+
+                //BluetoothLeScanner inicia el escaneo
+                mBluetoothLeScanner  = mBluetoothAdapter.getBluetoothLeScanner();
+                mBluetoothLeScanner.startScan(filters, settings, mScanCallback);
+                //mBluetoothLeScanner.startScan(mScanCallback);
+
+                Log.d(TAG, "Started scanning.");
+                //Handler para parar el escaneo tras un tiempo en milisegundos
+                mScanning = true;
+                Thread.sleep(30000);
+                publishProgress();
 
 
 
             }catch (Exception e){
                 e.printStackTrace();
             }
-            return null;
+            return arrayList;
         }
 
-        @Override
-        /*protected void onPreExecute(){
-            //dialog.setMessage("Loading...");
-            //dialog.setTitle("Progress");
-            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            dialog.setCancelable(false);
-            dialog.setProgress(0);
-            dialog.setMax(100);
-            dialog.show();
-        }*/
 
 
         protected void onProgressUpdate(Float... percent){
-            int p =Math.round(100*percent[0]);
+            //int p =Math.round(100*percent[0]);
            // mProgressText.setText(""+percent[0]);
             //mProgressBar.setProgress((float) percent[0]);
         }
+
 
     }//ScanTask
 
