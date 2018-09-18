@@ -62,7 +62,7 @@ public class ClientActivity extends AppCompatActivity {
     private boolean mScanning;
     private Handler mHandler;
     private Handler mLogHandler;
-    private Map<String, BluetoothDevice> mScanResults;
+    private Map<BluetoothDevice, String> mScanResults;
 
     private boolean mConnected;
     private BluetoothAdapter mBluetoothAdapter;
@@ -86,9 +86,8 @@ public class ClientActivity extends AppCompatActivity {
 
 
         mProgressBar = (ProgressBar) findViewById(R.id.progressbar); //ProgressBar
+        mProgressBar.setVisibility(View.INVISIBLE);
 
-
-        mProgressText=(TextView) findViewById(R.id.progresstext); //Progress Text
 
         arrayList=new ArrayList<String>();
         adapter = new ArrayAdapter<String>(ClientActivity.this, android.R.layout.simple_expandable_list_item_1, arrayList);
@@ -263,12 +262,12 @@ public class ClientActivity extends AppCompatActivity {
 
             return;
         }
-        for (String device : mScanResults.keySet()) {
+        for (BluetoothDevice device : mScanResults.keySet()) {
             //Se saca por pantalla cada devideAddres contenida en el mapa
             Log.d(TAG, "Found device: " + device);
             //deviceList.setText("Found device: " + deviceAddress);
             arrayList.clear();
-            arrayList.add(device);
+            arrayList.add(device.getName() + "\n" + device.getAddress());
             adapter.notifyDataSetChanged();
 
         }
@@ -290,9 +289,9 @@ public class ClientActivity extends AppCompatActivity {
 
 
     private class BleScanCallback extends ScanCallback {
-        private Map<String, BluetoothDevice> mScanResults;
+        private Map<BluetoothDevice, String> mScanResults;
 
-        BleScanCallback(Map<String, BluetoothDevice> scanResults) {
+        BleScanCallback(Map<BluetoothDevice, String> scanResults) {
             mScanResults = scanResults;
         }
         @Override
@@ -317,7 +316,7 @@ public class ClientActivity extends AppCompatActivity {
 
             BluetoothDevice device = result.getDevice();
             String deviceAddress = device.getAddress();
-            mScanResults.put(deviceAddress, device);
+            mScanResults.put(device, deviceAddress);
             /*stopScan();
             BluetoothDevice bluetoothDevice = scanResult.getDevice();
             connectDevice(bluetoothDevice);*/
