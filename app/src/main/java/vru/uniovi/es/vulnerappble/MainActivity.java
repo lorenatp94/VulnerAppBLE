@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pedesCard=(CardView) findViewById(R.id.pedes_card);
         nextButton = (Button) findViewById(R.id.next_button);
         connectButton= (Button) findViewById(R.id.connect_button);
-        scanButton=(Button)findViewById(R.id.scan_button);
+
 
         //Se añade función al boton y a las card
         motoCard.setOnClickListener(this);
@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pedesCard.setOnClickListener(this);
         nextButton.setOnClickListener(this);
         connectButton.setOnClickListener(this);
-        scanButton.setOnClickListener(this);
 
 
 

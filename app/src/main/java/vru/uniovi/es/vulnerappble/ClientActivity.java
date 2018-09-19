@@ -297,6 +297,7 @@ public class ClientActivity extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             addScanResult(result);
+
         }
 
         @Override
@@ -317,9 +318,9 @@ public class ClientActivity extends AppCompatActivity {
             BluetoothDevice device = result.getDevice();
             String deviceAddress = device.getAddress();
             mScanResults.put(device, deviceAddress);
-            /*stopScan();
-            BluetoothDevice bluetoothDevice = scanResult.getDevice();
-            connectDevice(bluetoothDevice);*/
+            arrayList.clear();
+            arrayList.add(device.getName() + "\n" + device.getAddress());
+            adapter.notifyDataSetChanged();
 
         }
     }//BleScanCallBack
@@ -403,7 +404,7 @@ public class ClientActivity extends AppCompatActivity {
                 Log.d(TAG, "Started scanning.");
                 //Handler para parar el escaneo tras un tiempo en milisegundos
                 mScanning = true;
-                Thread.sleep(30000);
+                Thread.sleep(300000);
                 publishProgress();
 
 
