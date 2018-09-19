@@ -89,8 +89,8 @@ public class ClientActivity extends AppCompatActivity {
         mProgressBar.setVisibility(View.INVISIBLE);
 
 
-        arrayList=new ArrayList<String>();
-        adapter = new ArrayAdapter<String>(ClientActivity.this, android.R.layout.simple_expandable_list_item_1, arrayList);
+        arrayList=new ArrayList<>();
+        adapter = new ArrayAdapter<>(ClientActivity.this, android.R.layout.simple_expandable_list_item_1, arrayList);
 
         //Sacamos el intent con el que se inició la activity
         Intent i= getIntent();
@@ -107,13 +107,13 @@ public class ClientActivity extends AppCompatActivity {
             // que hemos sacado del Bundle.
             switch(UsrType){
                 case "1":
-                    userType.setText("Motorist/Cyclist user");
+                    userType.setText(R.string.moto);
                     break;
                 case "2":
-                    userType.setText("Car driver user");
+                    userType.setText(R.string.car);
                     break;
                 case "3":
-                    userType.setText("Pedestrian user");
+                    userType.setText(R.string.walk);
                     break;
                 default:
                     System.out.println("Error");
@@ -234,11 +234,12 @@ public class ClientActivity extends AppCompatActivity {
         //Para detener el escaneo usamos el mismo ScanCallback de antes.
         // Se limpian variables relacionadas con el escaneo
         mProgressBar.setVisibility(View.INVISIBLE);
-        if (mScanning && mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && mBluetoothLeScanner != null) {
+
+        /*if (mScanning && mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && mBluetoothLeScanner != null) {
             mBluetoothLeScanner.stopScan(mScanCallback);
             scanComplete();
-        }
-
+        }*/
+        scanComplete();
         mScanCallback = null;
         mScanning = false;
         mHandler = null;
