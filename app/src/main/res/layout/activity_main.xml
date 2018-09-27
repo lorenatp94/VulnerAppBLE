@@ -150,17 +150,6 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/connect_button"
-            android:layout_width="255dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="0dp"
-            android:background="@color/colorPrimary"
-            android:text="@string/action_advertise"
-            android:textColor="@color/white"
-            android:textStyle="bold"/>
-
-        <Button
             android:id="@+id/next_button"
             android:layout_width="255dp"
             android:layout_height="wrap_content"
@@ -170,8 +159,6 @@
             android:text="@string/action_next"
             android:textColor="@color/white"
             android:textStyle="bold"/>
-
-
 
 
     </LinearLayout>

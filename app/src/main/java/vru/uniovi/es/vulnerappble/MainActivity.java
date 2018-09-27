@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = "MainActivity";
 
     private CardView motoCard, carCard, pedesCard;
-    private Button nextButton, connectButton, scanButton;
+    private Button nextButton;
     private BluetoothAdapter mBluetoothAdapter;
     public String UsrType;
 
@@ -35,23 +35,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         carCard=(CardView) findViewById(R.id.car_card);
         pedesCard=(CardView) findViewById(R.id.pedes_card);
         nextButton = (Button) findViewById(R.id.next_button);
-        connectButton= (Button) findViewById(R.id.connect_button);
-
 
         //Se añade función al boton y a las card
         motoCard.setOnClickListener(this);
         carCard.setOnClickListener(this);
         pedesCard.setOnClickListener(this);
         nextButton.setOnClickListener(this);
-        connectButton.setOnClickListener(this);
 
-
-
+        //Habilitación evento de enfoche en modo táctil
         carCard.setFocusableInTouchMode(true);
         pedesCard.setFocusableInTouchMode(true);
         motoCard.setFocusableInTouchMode(true);
-
-
 
      }
 
@@ -79,9 +73,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View w){
-        //objeto Bunlde que incluye el par "Clave/Valor"
-        //la clave será "user" y el texto dependerá de la opción escogida
-
 
         switch (w.getId()) {
             case R.id.moto_card:
@@ -94,11 +85,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.pedes_card:
                 UsrType= "3";
-                break;
-
-            case R.id.connect_button:
-                Intent intent_connect = new Intent(MainActivity.this, ServerActivity.class);
-                startActivity(intent_connect);
                 break;
 
             case R.id.next_button:
@@ -115,21 +101,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     b.putString("usr", UsrType.toString());
                     UsrType="0"; //Para cuando se vueva al menú
 
-                    // La clase Intent establece un link entre esta Activity y la nueva
+                    // La clase Intent establece un link entre  MainActivity y la siguiente Activity
                     // que queremos lanzar, para ello al instanciar el Intent
                     // introducimos como parámetros esta propia Activity, y la clase que
                     // representa a la nueva Activity.
                     Intent intent = new Intent(MainActivity.this, ClientActivity.class);
-
                     intent.putExtras(b);
                     startActivity(intent);
-
                 }
-
-
-
         }
 
     }//onClick
 
-}
+}//MainActivity

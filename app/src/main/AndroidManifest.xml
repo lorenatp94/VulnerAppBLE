@@ -62,7 +62,7 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" />
-        <activity android:name=".ServerActivity"></activity>
+
     </application>
 
 </manifest>

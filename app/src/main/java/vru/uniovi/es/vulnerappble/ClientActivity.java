@@ -186,10 +186,10 @@ public class ClientActivity extends AppCompatActivity {
         }
 
         AdvertiseSettings settings =new AdvertiseSettings.Builder()
-                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                 .setConnectable(true)
                 .setTimeout(0)
-                .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
+                .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                 .build();
         //Balanced Advertise para que sea rápidamente detectable pero no consuma tanta energía como Low Latency
         //Connectable true porque queremos pasar datos en ambos sentidos no como una baliza.
@@ -276,7 +276,7 @@ public class ClientActivity extends AppCompatActivity {
                 .build();
         filters.add(scanFilter);*/
         ScanSettings settings =new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).build();
+                .setScanMode(ScanSettings.SCAN_MODE_BALANCED).build();
 
         //BleScanCallback para manejar los resutados y se añade un mapa para guardarlos
         mScanResults=new HashMap<>();
@@ -323,8 +323,8 @@ public class ClientActivity extends AppCompatActivity {
             arrayList.clear();
             arrayList.add(device.getName() + "\n" + device.getAddress());
             adapter.notifyDataSetChanged();
-
         }
+
     }//scanComplete
 
     //Cuando se pulsa el botón Clear
@@ -343,7 +343,6 @@ public class ClientActivity extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             addScanResult(result);
-
         }
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
