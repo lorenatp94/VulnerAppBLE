@@ -51,8 +51,8 @@ public class ClientActivity extends AppCompatActivity {
     private TextView userType;
     public String UsrType;
     private ListView deviceList;
-    ArrayList<String> arrayList;
-    ArrayAdapter<String> adapter;
+    public ArrayList<String> arrayList;
+    public ArrayAdapter<String> adapter;
     private FloatingActionButton mapButton;
     private Button startButton, stopButton, clearButton;
     public List<BluetoothDevice> mDevices;
@@ -71,7 +71,7 @@ public class ClientActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client);
 
@@ -329,11 +329,13 @@ public class ClientActivity extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             addScanResult(result);
+
         }
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             for (ScanResult result : results) {
                 addScanResult(result);
+
             }
         }
         @Override
@@ -341,31 +343,29 @@ public class ClientActivity extends AppCompatActivity {
             Log.e(ClientTAG, "BLE Scan Failed with code " + errorCode);
         }
 
-        private void addScanResult(ScanResult result) {
-            BluetoothDevice device = result.getDevice();
-            String deviceAddress = device.getAddress();
-            mScanResults.put(device, deviceAddress);
-            arrayList.clear();
-            arrayList.add(device.getName() + "\n" + device.getAddress());
-            adapter.notifyDataSetChanged();
-        }
+        /*public boolean repeatDevice(ScanResult result){
+            for (BluetoothDevice device: mScanResults.keySet()){
+                if (device== result.getDevice()){
+                    return true;
+                }
+            }
+            return false;
+        }*/
+
     }//BleScanCallBack
 
-    //Clase para añadir y quitar dispositivos de la lista basada en newState
-   /* public class GattServerCallback extends BluetoothGattServerCallback {
-        @Override
-        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
-            super.onConnectionStateChange(device, status, newState);
-            String deviceAddress = device.getAddress();
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                //mDevices.add(device);
-                mScanResults.put(device, deviceAddress);
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                //mDevices.remove(device);
-                mScanResults.remove(deviceAddress);
-            }
+    public void addScanResult(ScanResult result) {
+        BluetoothDevice device = result.getDevice();
+        String deviceAddress = device.getAddress();
+        if (!mScanResults.containsKey(device)){
+            mScanResults.put(device, deviceAddress);
+            arrayList.add(device.getName() + "\n" + deviceAddress);
+            Log.d(ClientTAG, "Device: "+ deviceAddress);
+            adapter.notifyDataSetChanged();
         }
-    }//GattServerCallback*/
+
+    }
+
 
 
     private class GattClientCallback extends BluetoothGattCallback {
