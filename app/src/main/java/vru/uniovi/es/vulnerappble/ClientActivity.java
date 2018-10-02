@@ -2,6 +2,8 @@ package vru.uniovi.es.vulnerappble;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
@@ -44,28 +46,27 @@ public class ClientActivity extends AppCompatActivity {
     private static final String ClientTAG = "Client";
     private static final String ServerTAG = "Server";
     public static String SERVICE_STRING = "5377e081-74a8-4e92-86c1-ec474ec11d61";
-    private static final int REQUEST_ENABLE_BT = 1;
     public static UUID SERVICE_UUID = UUID.fromString(SERVICE_STRING);
+    private static final int REQUEST_ENABLE_BT = 1;
     private TextView userType;
-    //private TextView serverAddres;
+    public String UsrType;
     private ListView deviceList;
     ArrayList<String> arrayList;
     ArrayAdapter<String> adapter;
     private FloatingActionButton mapButton;
     private Button startButton, stopButton, clearButton;
-
-    private List<BluetoothDevice> mDevices;
-
+    public List<BluetoothDevice> mDevices;
     private boolean mScanning;
     private Handler mHandler;
-    private Map<BluetoothDevice, String> mScanResults;
+    public  Map<BluetoothDevice, String> mScanResults;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
     private BluetoothGattServer mGattServer;
     private BluetoothManager mBluetoothManager;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
-
+    private boolean mConnected;
+    private BluetoothGatt mGatt;
     private ProgressBar mProgressBar;
 
 
@@ -90,7 +91,7 @@ public class ClientActivity extends AppCompatActivity {
         Intent i= getIntent();//Sacamos el intent con el que se inició la activity
         Bundle b =i.getExtras();//Del intent sacamos el bundle
         if (b != null) {
-            String UsrType = b.getString("usr");// TextView a partir de la cadena de texto del Bundle.
+            UsrType = b.getString("usr");// TextView a partir de la cadena de texto del Bundle.
             switch (UsrType) {
                 case "1":
                     userType.setText(R.string.moto);
@@ -127,6 +128,7 @@ public class ClientActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //startScan();
                 new ScanTask().execute();
+
             }
         });
         stopButton= (Button) findViewById(R.id.stop_scanning_button);
@@ -149,7 +151,7 @@ public class ClientActivity extends AppCompatActivity {
 
     }//OnCreate
 
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
 
         //Chequeo de que el Advertising es compatible con el hardware del dispositivo
@@ -167,9 +169,6 @@ public class ClientActivity extends AppCompatActivity {
         setupServer();
         startAdvertising();
 
-        //Muestra MAC local por pantalla
-        /*String macAddress = android.provider.Settings.Secure.getString(this.getContentResolver(), "bluetooth_address");
-        serverAddres.setText(getString(R.string.serverAd, macAddress ));*/
 
     } //onResume
     //Se añade el Servicio al Servidor
@@ -194,40 +193,36 @@ public class ClientActivity extends AppCompatActivity {
         //Balanced Advertise para que sea rápidamente detectable pero no consuma tanta energía como Low Latency
         //Connectable true porque queremos pasar datos en ambos sentidos no como una baliza.
         //Timeout a 0 para anunciarse siempre
-        //Low Power Level ya que estamos utilizando BLE
+        //High Level para mayor rango de visibilidad del paquete publicitario
 
         ParcelUuid parcelUuid= new ParcelUuid(SERVICE_UUID);
+        byte [] serviceData = UsrType.getBytes();
         AdvertiseData data =new AdvertiseData.Builder()
-                .setIncludeDeviceName(true)
                 //.addServiceUuid(parcelUuid)
+                .addServiceData(parcelUuid,serviceData)
                 .setIncludeTxPowerLevel(true)
                 .build();
         //Incluir el nombre del dispositivo hace que sea más fácil de identificar el servidor
+        //Se incluye el nivel de transmision para luego calcular la posicion
 
-        mBluetoothLeAdvertiser.startAdvertising(settings,data,mAdvertiseCallback);
+        AdvertiseData scanResponse =new AdvertiseData.Builder()
+                .setIncludeDeviceName(true)
+                .build();
 
-        //serverAddres.setText("Server Address: " + mDevices.toString());
+        mBluetoothLeAdvertiser.startAdvertising(settings,data, scanResponse,mAdvertiseCallback);
     }//startAdvertising
 
+    //Callback del Advertising
     private AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             Log.d(ServerTAG, "Peripheral advertising started.");
-
         }
-
         @Override
         public void onStartFailure (int errorCode){
             Log.d(ServerTAG, "Peripheral advertising failed: " + errorCode);
         }
     };
-
-    //Para gastar menos batería, el servidor para cuando esté en background
-    /*protected void onPause(){
-        super.onPause();
-        stopAdvertising();
-        stopServer();
-    }*/
 
     private void stopServer(){
         if(mGattServer != null){
@@ -235,7 +230,6 @@ public class ClientActivity extends AppCompatActivity {
         }
         Log.d(ServerTAG, "Server stopped.");
     }
-
 
     private void stopAdvertising(){
         if(mBluetoothLeAdvertiser !=null){
@@ -309,20 +303,12 @@ public class ClientActivity extends AppCompatActivity {
     //Si hay, se saca por pantalla cada deviceAddres contenida en el mapa
 
         if (mScanResults.isEmpty()) {
-            Log.d(ClientTAG, "No se encuentran dispositivos.");
-            String mensaje= "No se encuentran dispositivos";
+            Log.d(ClientTAG, "Devices not found.");
+            String mensaje= "Devices not found";
             arrayList.clear();
             arrayList.add(mensaje);
             adapter.notifyDataSetChanged();
-            return;
-        }
 
-        for (BluetoothDevice device : mScanResults.keySet()) {
-            Log.d(ClientTAG, "Found device: " + device);
-            //deviceList.setText("Found device: " + deviceAddress);
-            arrayList.clear();
-            arrayList.add(device.getName() + "\n" + device.getAddress());
-            adapter.notifyDataSetChanged();
         }
 
     }//scanComplete
@@ -334,9 +320,9 @@ public class ClientActivity extends AppCompatActivity {
         arrayList.clear();
     }
 
-    private class BleScanCallback extends ScanCallback {
+    //Callback del escaneo
+    public class BleScanCallback extends ScanCallback {
         private Map<BluetoothDevice, String> mScanResults;
-
         BleScanCallback(Map<BluetoothDevice, String> scanResults) {
             mScanResults = scanResults;
         }
@@ -365,21 +351,24 @@ public class ClientActivity extends AppCompatActivity {
         }
     }//BleScanCallBack
 
-    //Clase para añadir y quitar servicios de la lista basada en newState
-    public class GattServerCallback extends BluetoothGattServerCallback {
+    //Clase para añadir y quitar dispositivos de la lista basada en newState
+   /* public class GattServerCallback extends BluetoothGattServerCallback {
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
+            String deviceAddress = device.getAddress();
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                mDevices.add(device);
+                //mDevices.add(device);
+                mScanResults.put(device, deviceAddress);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                mDevices.remove(device);
+                //mDevices.remove(device);
+                mScanResults.remove(deviceAddress);
             }
         }
-    }//GattServerCalback
+    }//GattServerCallback*/
 
 
-   /* private class GattClientCallback extends BluetoothGattCallback {
+    private class GattClientCallback extends BluetoothGattCallback {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState){
             super.onConnectionStateChange(gatt, status, newState);
@@ -398,19 +387,18 @@ public class ClientActivity extends AppCompatActivity {
         }
     }//GatClientCallback
 
-    /* private void connectDevice(BluetoothDevice device) {
+   private void connectDevice(BluetoothDevice device) {
         GattClientCallback gattClientCallback = new GattClientCallback();
         mGatt = device.connectGatt(this, false, gattClientCallback);
-    }*/
+    }
 
-
-    /*public void disconnectGattServer(){
+    public void disconnectGattServer(){
         mConnected =false;
         if(mGatt != null){
             mGatt.disconnect();
             mGatt.close();
         }
-    } //disconnectGattServer*/
+    } //disconnectGattServer
 
     public class ScanTask extends AsyncTask<Void, Void, ArrayList>
     {
@@ -420,18 +408,15 @@ public class ClientActivity extends AppCompatActivity {
             deviceList= (ListView) findViewById(R.id.deviceList); //Lista de dispositivos
             deviceList.setAdapter(adapter);
         }
-
         @Override
         protected void onPostExecute(ArrayList s) {
             mProgressBar.setVisibility(View.INVISIBLE);
             scanComplete();
         }
-
         @Override
         protected void onProgressUpdate(Void... values) {
             //progressDialog.incrementProgressBy(1);
         }
-
         @Override
         protected ArrayList<String> doInBackground(Void... args) {
             try{
