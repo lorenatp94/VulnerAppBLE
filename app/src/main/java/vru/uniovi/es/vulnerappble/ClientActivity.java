@@ -43,6 +43,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_NOTIFY;
@@ -86,6 +88,9 @@ public class ClientActivity extends AppCompatActivity {
     private boolean mConnected;
     private BluetoothGatt mGatt;
     private ProgressBar mProgressBar;
+    private Timer timer;
+    private TimerTask task;
+
 
 
     @Override
@@ -124,6 +129,10 @@ public class ClientActivity extends AppCompatActivity {
                     System.out.println("Error");
             }//switch
         }//if
+        //StartScan que se repite cada 3seg para actualizar a lista de dispositivos disponibles
+
+
+
 
         //Inicialización adaptador Bluetooth
         mBluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
@@ -144,9 +153,24 @@ public class ClientActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startScan();
-                //new ScanTask().execute();
-
+                //startScan();
+                timer= new Timer();
+                task = new TimerTask(){
+                    @Override
+                    public void run(){
+                        runOnUiThread(new Runnable(){
+                            @Override
+                            public void run(){
+                                mScanCallback = null;
+                                mScanning = false;
+                                mHandler = null;
+                                adapter.clear();
+                                startScan();
+                            }
+                        });
+                    }
+                };
+                timer.scheduleAtFixedRate(task, 1000, 3000);
             }
         });
         stopButton= (Button) findViewById(R.id.stop_scanning_button);
@@ -154,7 +178,12 @@ public class ClientActivity extends AppCompatActivity {
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mProgressBar.setVisibility(View.INVISIBLE);
+
+                timer.cancel();
+                timer.purge();
                 stopScan();
+
             }
         });
 
@@ -166,6 +195,7 @@ public class ClientActivity extends AppCompatActivity {
                 clearList();
             }
         });
+
 
     }//OnCreate
 
@@ -351,14 +381,13 @@ public class ClientActivity extends AppCompatActivity {
         String deviceAddress = device.getAddress();
         ScanRecord scanRecord = result.getScanRecord();
         String manufacturedDataStr;
-        byte[] manufacturerData= null;
+        byte[] manufacturerData;
         manufacturerData = scanRecord.getManufacturerSpecificData(65535);
         manufacturedDataStr= new String(manufacturerData);
 
 
         if (!mScanResults.containsKey(device)){
             mScanResults.put(device, deviceAddress);
-
             arrayList.add(device.getName() + "\n" + deviceAddress);
             Log.d(ClientTAG, "Device: "+ deviceAddress+ " RSSI: "+ result.getRssi());
             Log.d(ClientTAG, "Usertype: "+ manufacturedDataStr);
@@ -369,8 +398,8 @@ public class ClientActivity extends AppCompatActivity {
 
     //Parada del escaneo
     public void stopScan(){
-        mProgressBar.setVisibility(View.INVISIBLE);
-        scanComplete();
+
+       scanComplete();
 
         //Se limpian variables relacionadas con el escaneo
         mScanCallback = null;
