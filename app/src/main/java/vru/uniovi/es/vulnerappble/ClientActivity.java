@@ -144,8 +144,8 @@ public class ClientActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //startScan();
-                new ScanTask().execute();
+                startScan();
+                //new ScanTask().execute();
 
             }
         });
@@ -218,15 +218,15 @@ public class ClientActivity extends AppCompatActivity {
         //Connectable true porque queremos pasar datos en ambos sentidos no como una baliza.
         //Timeout a 0 para anunciarse siempre
         //High Level para mayor rango de visibilidad del paquete publicitario
-        //byte[] userData= null;
+        byte[] userData;
         ParcelUuid parcelUuid= new ParcelUuid(SERVICE_UUID2);
         /*try{
             userData = UsrType.getBytes("UTF-8");
         }catch(UnsupportedEncodingException e){ }*/
-        byte [] userData = UsrType.getBytes();
+        userData = UsrType.getBytes();
 
         AdvertiseData data =new AdvertiseData.Builder()
-                //.addManufacturerData(65535, userData)
+                .addManufacturerData(65535, userData)
                 .addServiceData(parcelUuid,userData)
                 .setIncludeTxPowerLevel(true) //Se incluye el nivel de transmision para luego calcular la posicion
                 .build();
@@ -277,44 +277,15 @@ public class ClientActivity extends AppCompatActivity {
         Log.d(ClientTAG, "Requested user enables Bluetooth. Try starting the scan again.");
     }
 
-    //Tarea asíncrona para el escaneo. Se lanza al pulsar el botón START
-    public class ScanTask extends AsyncTask<Void, Void, ArrayList>
-    {
-        @Override
-        protected  void onPreExecute(){
-            mProgressBar.setVisibility(View.VISIBLE);
-            deviceList= (ListView) findViewById(R.id.deviceList); //Lista de dispositivos
-            deviceList.setAdapter(adapter);
-        }
-        @Override
-        protected void onPostExecute(ArrayList s) {
-            mProgressBar.setVisibility(View.INVISIBLE);
-            scanComplete();
-        }
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            //progressDialog.incrementProgressBy(1);
-        }
-        @Override
-        protected ArrayList<String> doInBackground(Void... args) {
-            try{
-                startScan();
-                Thread.sleep(300000);
-                publishProgress();
-
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            return arrayList;
-        }
-
-    }//ScanTask
 
     //Inicialización del escaneo
     public void startScan(){
         if (!hasPermissions() || mScanning) {
             return;
         }
+        mProgressBar.setVisibility(View.VISIBLE);
+        deviceList= (ListView) findViewById(R.id.deviceList); //Lista de dispositivos
+        deviceList.setAdapter(adapter);
 
         List<ScanFilter> filters = new ArrayList<>();
         //Añadimos filtro para el UUID del servicio de servidor Gatt
@@ -379,19 +350,18 @@ public class ClientActivity extends AppCompatActivity {
         BluetoothDevice device = result.getDevice();
         String deviceAddress = device.getAddress();
         ScanRecord scanRecord = result.getScanRecord();
+        String manufacturedDataStr;
+        byte[] manufacturerData= null;
+        manufacturerData = scanRecord.getManufacturerSpecificData(65535);
+        manufacturedDataStr= new String(manufacturerData);
 
-        String manufacturedDataStr="";
-       // byte[] manufacturerData = scanRecord.getManufacturerSpecificData(65535);
-        /*try{
-            manufacturedDataStr= new String(manufacturerData, "UTF-8");
-        }catch (UnsupportedEncodingException e){}*/
 
         if (!mScanResults.containsKey(device)){
             mScanResults.put(device, deviceAddress);
 
             arrayList.add(device.getName() + "\n" + deviceAddress);
             Log.d(ClientTAG, "Device: "+ deviceAddress+ " RSSI: "+ result.getRssi());
-           // Log.d(ClientTAG, "Usetype: "+ manufacturedDataStr);
+            Log.d(ClientTAG, "Usertype: "+ manufacturedDataStr);
             adapter.notifyDataSetChanged();
         }
     }//addScanResult
@@ -413,7 +383,6 @@ public class ClientActivity extends AppCompatActivity {
 
     public void scanComplete() {
     //Si no hay dispositivos se saca mensaje informando
-
         if (mScanResults.isEmpty()) {
             Log.d(ClientTAG, "Devices not found.");
             String mensaje= "Devices not found";
@@ -429,45 +398,5 @@ public class ClientActivity extends AppCompatActivity {
         mScanResults.clear();
         arrayList.clear();
     }
-
-    //Funciones para conectarse a un dispositivo de la lista
-   private void connectDevice(BluetoothDevice device) {
-        GattClientCallback gattClientCallback = new GattClientCallback();
-        mGatt = device.connectGatt(this, false, gattClientCallback);
-    }
-
-    private class GattClientCallback extends BluetoothGattCallback {
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState){
-            super.onConnectionStateChange(gatt, status, newState);
-            if(status == BluetoothGatt.GATT_FAILURE){
-                disconnectGattServer();
-                return;
-            } else if (status != BluetoothGatt.GATT_SUCCESS){
-                disconnectGattServer();
-                return;
-            }
-            if (newState== BluetoothProfile.STATE_CONNECTED){
-                mConnected=true;
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED){
-                disconnectGattServer();
-            }
-        }
-    }//GatClientCallback
-
-    private void stopServer(){
-        if(mGattServer != null){
-            mGattServer.close();
-        }
-        Log.d(ServerTAG, "Server stopped.");
-    }
-    public void disconnectGattServer(){
-        mConnected =false;
-        if(mGatt != null){
-            mGatt.disconnect();
-            mGatt.close();
-        }
-    } //disconnectGattServer
-
 
 }//ClientActivity

@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 import java.util.ArrayList;
 import java.util.Map;
 
-//Clase para añadir o quitar dispositivos de la lista
+//Clase para añadir o quitar servicioss de la lista
 public class GattServerCallback extends BluetoothGattServerCallback {
     public Map<BluetoothDevice, String> mScanResults;
     private ArrayList<String> arrayList;
