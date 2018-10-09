@@ -25,17 +25,10 @@ public class GattServerCallback extends BluetoothGattServerCallback {
 
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             //mScanResults.remove(deviceAddress);
-            //deleteResult(device);
+
 
         }
     }
 
-    public void deleteResult(BluetoothDevice device) {
-        for (int i = 0; i < arrayList.size(); i++) {
-            if (arrayList.get(i).contains(device.getAddress())) {
-                arrayList.remove(i);
-                adapter.notifyDataSetChanged();
-            }
-        }
-    }
+
 }

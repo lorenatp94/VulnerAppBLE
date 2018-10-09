@@ -2,15 +2,9 @@ package vru.uniovi.es.vulnerappble;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServer;
-import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
@@ -22,14 +16,11 @@ import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.ParcelUuid;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -38,7 +29,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.os.Handler;
 
-import java.io.UnsupportedEncodingException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,11 +38,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_NOTIFY;
-import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_READ;
-import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE;
-import static android.bluetooth.BluetoothGattDescriptor.PERMISSION_READ;
-import static android.bluetooth.BluetoothGattDescriptor.PERMISSION_WRITE;
+
 
 
 public class ClientActivity extends AppCompatActivity {
@@ -64,20 +51,17 @@ public class ClientActivity extends AppCompatActivity {
     public static String SERVICE_STRING = "00001811-0000-1000-8000-0080F9B34FB";
     public static UUID SERVICE_UUID = UUID.fromString(SERVICE_STRING);
     public static UUID SERVICE_UUID2 = UUID.fromString("795090c7-420d-4048-a24e-18e60180e23c");
-    public static UUID CHARACTERISTIC_COUNTER_UUID = UUID.fromString("31517c58-66bf-470c-b662-e352a6c80cba");
-    public static UUID CHARACTERISTIC_INTERACTOR_UUID = UUID.fromString("0b89d2d4-0ea6-4141-86bb-0c5fb91ab14a");
-    public static UUID DESCRIPTOR_CONFIG_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+
 
     private TextView userType;
     public String UsrType;
     private ListView deviceList;
-    public ArrayList<String> arrayList;
-    public ArrayAdapter<String> adapter;
+    public ArrayList<Device> arrayList;
+    public ArrayAdapter adapter;
     private FloatingActionButton mapButton;
     private Button startButton, stopButton, clearButton;
-    public List<BluetoothDevice> mDevices;
     private boolean mScanning;
-    private Handler mHandler;
+
     public  Map<BluetoothDevice, String> mScanResults;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothLeScanner mBluetoothLeScanner;
@@ -85,11 +69,11 @@ public class ClientActivity extends AppCompatActivity {
     private BluetoothGattServer mGattServer;
     private BluetoothManager mBluetoothManager;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
-    private boolean mConnected;
-    private BluetoothGatt mGatt;
     private ProgressBar mProgressBar;
     private Timer timer;
     private TimerTask task;
+
+    private static boolean run=true;
 
 
 
@@ -108,7 +92,12 @@ public class ClientActivity extends AppCompatActivity {
 
         //Inicialización del adaptador entre el arrayList y el ListView
         arrayList=new ArrayList<>();
-        adapter = new ArrayAdapter<>(ClientActivity.this, android.R.layout.simple_expandable_list_item_1, arrayList);
+        adapter=new DeviceAdapter(this, R.layout.list_item, arrayList);
+
+        mScanResults=new HashMap<>();
+        mScanCallback = new BleScanCallback(mScanResults);
+        deviceList= (ListView) findViewById(R.id.deviceList); //Lista de dispositivos
+        deviceList.setAdapter(adapter);
 
         //Establecer el tipo de usuario escogido en el Main
         Intent i= getIntent();//Sacamos el intent con el que se inició la activity
@@ -129,7 +118,7 @@ public class ClientActivity extends AppCompatActivity {
                     System.out.println("Error");
             }//switch
         }//if
-        //StartScan que se repite cada 3seg para actualizar a lista de dispositivos disponibles
+
 
 
 
@@ -150,29 +139,14 @@ public class ClientActivity extends AppCompatActivity {
         });
         startButton= (Button) findViewById(R.id.start_scanning_button);
         startButton.setFocusableInTouchMode(true);
+        Handler handler=new Handler();
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //startScan();
-                timer= new Timer();
-                task = new TimerTask(){
-                    @Override
-                    public void run(){
-                        runOnUiThread(new Runnable(){
-                            @Override
-                            public void run(){
-                                mScanCallback = null;
-                                mScanning = false;
-                                mHandler = null;
-                                adapter.clear();
-                                startScan();
-                            }
-                        });
-                    }
-                };
-                timer.scheduleAtFixedRate(task, 1000, 3000);
+                startScan();
             }
         });
+
         stopButton= (Button) findViewById(R.id.stop_scanning_button);
         stopButton.setFocusableInTouchMode(true);
         stopButton.setOnClickListener(new View.OnClickListener() {
@@ -180,8 +154,6 @@ public class ClientActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mProgressBar.setVisibility(View.INVISIBLE);
 
-                timer.cancel();
-                timer.purge();
                 stopScan();
 
             }
@@ -257,7 +229,7 @@ public class ClientActivity extends AppCompatActivity {
 
         AdvertiseData data =new AdvertiseData.Builder()
                 .addManufacturerData(65535, userData)
-                .addServiceData(parcelUuid,userData)
+               // .addServiceData(parcelUuid,userData)
                 .setIncludeTxPowerLevel(true) //Se incluye el nivel de transmision para luego calcular la posicion
                 .build();
 
@@ -307,16 +279,16 @@ public class ClientActivity extends AppCompatActivity {
         Log.d(ClientTAG, "Requested user enables Bluetooth. Try starting the scan again.");
     }
 
-
     //Inicialización del escaneo
     public void startScan(){
         if (!hasPermissions() || mScanning) {
             return;
         }
         mProgressBar.setVisibility(View.VISIBLE);
-        deviceList= (ListView) findViewById(R.id.deviceList); //Lista de dispositivos
-        deviceList.setAdapter(adapter);
 
+        mScanResults.clear();
+        arrayList.clear();
+        adapter.notifyDataSetChanged();
         List<ScanFilter> filters = new ArrayList<>();
         //Añadimos filtro para el UUID del servicio de servidor Gatt
        /* ScanFilter scanFilter = new ScanFilter.Builder()
@@ -330,8 +302,8 @@ public class ClientActivity extends AppCompatActivity {
 
 
         //BleScanCallback para manejar los resutados y se añade un mapa para guardarlos
-        mScanResults=new HashMap<>();
-        mScanCallback = new BleScanCallback(mScanResults);
+
+
 
         //BluetoothLeScanner inicia el escaneo. Devuelve os resultados en la variable mScanCallback
         mBluetoothLeScanner  = mBluetoothAdapter.getBluetoothLeScanner();
@@ -345,6 +317,7 @@ public class ClientActivity extends AppCompatActivity {
     //Callback del escaneo
     public class BleScanCallback extends ScanCallback {
         private Map<BluetoothDevice, String> mScanResults;
+
         BleScanCallback(Map<BluetoothDevice, String> scanResults) {
             mScanResults = scanResults;
 
@@ -365,32 +338,30 @@ public class ClientActivity extends AppCompatActivity {
             Log.e(ClientTAG, "BLE Scan Failed with code " + errorCode);
         }
 
-        /*public boolean repeatDevice(ScanResult result){
-            for (BluetoothDevice device: mScanResults.keySet()){
-                if (device== result.getDevice()){
-                    return true;
-                }
-            }
-            return false;
-        }*/
-
     }//BleScanCallBack
 
     public void addScanResult(ScanResult result) {
+
         BluetoothDevice device = result.getDevice();
-        String deviceAddress = device.getAddress();
+
         ScanRecord scanRecord = result.getScanRecord();
         String manufacturedDataStr;
-        byte[] manufacturerData;
-        manufacturerData = scanRecord.getManufacturerSpecificData(65535);
+        //byte[] manufacturerData;
+        byte[] manufacturerData = scanRecord.getManufacturerSpecificData(65535);
         manufacturedDataStr= new String(manufacturerData);
+
+        String deviceAddress=device.getAddress();
+        String deviceName=device.getName();
+        int rssi=result.getRssi();
+        Device disp = new Device(deviceName, deviceAddress,manufacturedDataStr , rssi);
 
 
         if (!mScanResults.containsKey(device)){
             mScanResults.put(device, deviceAddress);
-            arrayList.add(device.getName() + "\n" + deviceAddress);
-            Log.d(ClientTAG, "Device: "+ deviceAddress+ " RSSI: "+ result.getRssi());
+            arrayList.add(disp);
+            Log.d(ClientTAG, "Device: "+ deviceName+ " RSSI: "+ result.getRssi());
             Log.d(ClientTAG, "Usertype: "+ manufacturedDataStr);
+
             adapter.notifyDataSetChanged();
         }
     }//addScanResult
@@ -399,13 +370,13 @@ public class ClientActivity extends AppCompatActivity {
     //Parada del escaneo
     public void stopScan(){
 
-       scanComplete();
+        //scanComplete();
+
 
         //Se limpian variables relacionadas con el escaneo
-        mScanCallback = null;
+        //mScanCallback = null;
         mScanning = false;
-        mHandler = null;
-
+        mBluetoothLeScanner.stopScan(mScanCallback);
         Log.d(ClientTAG, "Stopped scanning.");
 
     }//stopScan
@@ -416,16 +387,16 @@ public class ClientActivity extends AppCompatActivity {
             Log.d(ClientTAG, "Devices not found.");
             String mensaje= "Devices not found";
             arrayList.clear();
-            arrayList.add(mensaje);
+            //arrayList.add(mensaje);
             adapter.notifyDataSetChanged();
         }
     }//scanComplete
 
     //Cuando se pulsa el botón Clear
     private void clearList(){
-        deviceList.setAdapter(null);
         mScanResults.clear();
         arrayList.clear();
+        adapter.notifyDataSetChanged();
     }
 
 }//ClientActivity

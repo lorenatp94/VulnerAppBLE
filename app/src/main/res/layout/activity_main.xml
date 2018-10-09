@@ -37,14 +37,16 @@
                 android:orientation="vertical"
                 android:background="@color/white"
                 android:gravity="center">
+
                 <ImageView
+                    android:id="@+id/moto_view"
                     android:layout_width="64dp"
                     android:layout_height="64dp"
                     android:layout_marginTop="15dp"
                     android:background="@drawable/cerclebackgroundpurple"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_directions_bike_black_24dp"
-                    android:padding="10dp"/>
+                    android:padding="10dp"
+                    android:src="@drawable/ic_directions_bike_black_24dp" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -73,14 +75,16 @@
                 android:orientation="vertical"
                 android:background="@color/white"
                 android:gravity="center">
+
                 <ImageView
                     android:layout_width="64dp"
                     android:layout_height="64dp"
                     android:layout_marginTop="15dp"
                     android:background="@drawable/cerclebackgroundgreen"
-                    android:src="@drawable/ic_directions_car_black_24dp"
                     android:contentDescription="@null"
-                    android:padding="10dp"/>
+                    android:padding="10dp"
+                    android:src="@drawable/ic_directions_car_black_24dp"
+                    tools:id="@+id/car_view" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -118,14 +122,16 @@
                 android:orientation="vertical"
                 android:background="@color/white"
                 android:gravity="center">
+
                 <ImageView
                     android:layout_width="64dp"
                     android:layout_height="64dp"
                     android:layout_marginTop="15dp"
                     android:background="@drawable/circlebackgroundpink"
-                    android:src="@drawable/ic_directions_walk_black_24dp"
                     android:contentDescription="@null"
-                    android:padding="10dp"/>
+                    android:padding="10dp"
+                    android:src="@drawable/ic_directions_walk_black_24dp"
+                    tools:id="@+id/pedestrian_view" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

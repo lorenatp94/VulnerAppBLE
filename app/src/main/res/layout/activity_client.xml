@@ -28,18 +28,19 @@
     <ListView
         android:id="@+id/deviceList"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="243dp"
         android:layout_gravity="center"
         android:textStyle="bold" />
 
     <ProgressBar
         android:id="@+id/progressbar"
         android:layout_width="match_parent"
-        android:layout_height="52dp" />
+        android:layout_height="51dp" />
+
     <TextView
         android:id="@+id/progresstext"
         android:layout_width="match_parent"
-        android:layout_height="53dp"
+        android:layout_height="24dp"
         android:layout_gravity="center"
         android:textStyle="bold" />
 
