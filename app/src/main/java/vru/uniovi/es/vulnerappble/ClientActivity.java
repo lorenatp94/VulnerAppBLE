@@ -46,6 +46,7 @@ public class ClientActivity extends AppCompatActivity {
     private static final String ClientTAG = "Client";
     private static final String ServerTAG = "Server";
     private static final int REQUEST_ENABLE_BT = 1;
+    private static int ManufacturedId= 65535;
 
     //public static String SERVICE_STRING = "5377e081-74a8-4e92-86c1-ec474ec11d61";
     public static String SERVICE_STRING = "00001811-0000-1000-8000-0080F9B34FB";
@@ -72,8 +73,11 @@ public class ClientActivity extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private Timer timer;
     private TimerTask task;
+    private Runnable runnableCode;
+    private byte[] manufacturerData;
+    private String manufacturedDataStr;
+    private boolean run;
 
-    private static boolean run=true;
 
 
 
@@ -139,11 +143,30 @@ public class ClientActivity extends AppCompatActivity {
         });
         startButton= (Button) findViewById(R.id.start_scanning_button);
         startButton.setFocusableInTouchMode(true);
-        Handler handler=new Handler();
+        final Handler handler=new Handler();
+
+        runnableCode= new Runnable(){
+
+            @Override
+            public void run() {
+                if(run){
+                    stopScan();
+                    startScan();
+                    handler.postDelayed(runnableCode,7000);
+                }
+
+
+            }
+        };
+
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                run=true;
                 startScan();
+                handler.post(runnableCode);
+                handler.removeCallbacksAndMessages(runnableCode);
+
             }
         });
 
@@ -153,7 +176,9 @@ public class ClientActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mProgressBar.setVisibility(View.INVISIBLE);
-
+                //handler.removeCallbacks(runnableCode);
+                run=false;
+                handler.removeCallbacks(runnableCode);
                 stopScan();
 
             }
@@ -229,7 +254,7 @@ public class ClientActivity extends AppCompatActivity {
 
         AdvertiseData data =new AdvertiseData.Builder()
                 .addManufacturerData(65535, userData)
-               // .addServiceData(parcelUuid,userData)
+                .addServiceData(parcelUuid,userData)
                 .setIncludeTxPowerLevel(true) //Se incluye el nivel de transmision para luego calcular la posicion
                 .build();
 
@@ -345,11 +370,10 @@ public class ClientActivity extends AppCompatActivity {
         BluetoothDevice device = result.getDevice();
 
         ScanRecord scanRecord = result.getScanRecord();
-        String manufacturedDataStr;
-        //byte[] manufacturerData;
-        byte[] manufacturerData = scanRecord.getManufacturerSpecificData(65535);
+        manufacturedDataStr="";
+        manufacturerData=null;
+        manufacturerData = scanRecord.getManufacturerSpecificData(ManufacturedId);
         manufacturedDataStr= new String(manufacturerData);
-
         String deviceAddress=device.getAddress();
         String deviceName=device.getName();
         int rssi=result.getRssi();
