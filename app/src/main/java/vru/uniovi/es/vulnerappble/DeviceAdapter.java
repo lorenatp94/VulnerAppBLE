@@ -34,22 +34,32 @@ public class DeviceAdapter extends ArrayAdapter<Device> {
 
         TextView textView1 = (TextView)item.findViewById(R.id.device_name);
         textView1.setText(deviceList.get(position).getDeviceName());
+
         TextView textView2 = (TextView)item.findViewById(R.id.device_address);
         textView2.setText(deviceList.get(position).getDeviceAddress());
+
         TextView textView3 = (TextView)item.findViewById(R.id.device_rssi);
         textView3.setText(Integer.toString(deviceList.get(position).getRssi()));
 
         ImageView imageDevice = (ImageView)item.findViewById(R.id.device_image);
         String  user= deviceList.get(position).getuType();
-        if (user.equals("1")){
-            imageDevice.setImageResource(R.drawable.ic_directions_bike_black_24dp);
-            imageDevice.setBackgroundResource(R.drawable.cerclebackgroundpurple);}
-        if (user.equals("2")){
-            imageDevice.setImageResource(R.drawable.ic_directions_car_black_24dp);
-            imageDevice.setBackgroundResource(R.drawable.cerclebackgroundgreen);}
-        if (user.equals("3")){
-            imageDevice.setImageResource(R.drawable.ic_directions_walk_black_24dp);
-            imageDevice.setBackgroundResource(R.drawable.circlebackgroundpink);}
+
+        switch(user){
+            case ("1"):
+                imageDevice.setImageResource(R.drawable.ic_directions_bike_black_24dp);
+                imageDevice.setBackgroundResource(R.drawable.cerclebackgroundpurple);
+                break;
+            case ("2"):
+                imageDevice.setImageResource(R.drawable.ic_directions_car_black_24dp);
+                imageDevice.setBackgroundResource(R.drawable.cerclebackgroundgreen);
+                break;
+            case("3"):
+                imageDevice.setImageResource(R.drawable.ic_directions_walk_black_24dp);
+                imageDevice.setBackgroundResource(R.drawable.circlebackgroundpink);
+                break;
+            default:
+                System.out.println("Error");
+        }
 
         return(item);
 
