@@ -17,11 +17,13 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.ParcelUuid;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -83,14 +85,10 @@ public class ClientActivity extends AppCompatActivity {
 
 
 
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client);
-        
-
 
 
         //Icono en ActionBar
@@ -110,6 +108,12 @@ public class ClientActivity extends AppCompatActivity {
         deviceList= (ListView) findViewById(R.id.deviceList); //Lista de dispositivos
         deviceList.setAdapter(adapter);
 
+        //Inicialización adaptador Bluetooth
+        mBluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+        mBluetoothAdapter = mBluetoothManager.getAdapter();
+        String deviceUsrName= mBluetoothAdapter.getName();
+
+
         //Establecer el tipo de usuario escogido en el Main
         Intent intentClient= getIntent();//Sacamos el intent con el que se inició la activity
         Bundle bundleClient =intentClient.getExtras();//Del intent sacamos el bundle
@@ -117,23 +121,20 @@ public class ClientActivity extends AppCompatActivity {
             UsrType = bundleClient.getString("usr");// TextView a partir de la cadena de texto del Bundle.
             switch (UsrType) {
                 case MOTO:
-                    userType.setText(R.string.moto);
+                    userType.setText("User type: Motorist/Cyclist"+'\n'+"Name: "+ deviceUsrName);
                     break;
                 case CAR:
-                    userType.setText(R.string.car);
+                    userType.setText("User type: Car"+'\n'+"Name: "+ deviceUsrName);
                     break;
                 case PED:
-                    userType.setText(R.string.walk);
+                    userType.setText("User type: Pedestrian"+'\n'+"Name: "+ deviceUsrName);
                     break;
                 default:
                     System.out.println("Error");
             }//switch
+
         }//if
 
-
-        //Inicialización adaptador Bluetooth
-        mBluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
-        mBluetoothAdapter = mBluetoothManager.getAdapter();
 
         //Botones
         mapButton = (FloatingActionButton) findViewById(R.id.fab);
@@ -181,7 +182,6 @@ public class ClientActivity extends AppCompatActivity {
                 mProgressBar.setVisibility(View.INVISIBLE); //Se quita la ProgressBar cuando el escaneo está parado
                 run=false; //Se para la StartTask
                 handler.removeCallbacksAndMessages(StartTask);//Eiminación de todos los callbacks y mensajes de StartTask
-                stopScan();
                 scanComplete();
             }
         });
@@ -196,11 +196,11 @@ public class ClientActivity extends AppCompatActivity {
         });
 
 
+
     }//OnCreate
 
     public void onResume() {
         super.onResume();
-
         //Chequeo de que el Advertising es compatible con el hardware del dispositivo
         if(!mBluetoothAdapter.isMultipleAdvertisementSupported()){
             Log.d(ServerTAG, "No ad suppported.");
@@ -209,11 +209,15 @@ public class ClientActivity extends AppCompatActivity {
         }
         Log.d(ServerTAG, "Ad suppported.");
 
+
+
+
         //Acceso al Advertiser
         mBluetoothLeAdvertiser=mBluetoothAdapter.getBluetoothLeAdvertiser();
         GattServerCallback gattServerCallback = new GattServerCallback();
         mGattServer = mBluetoothManager.openGattServer(this, gattServerCallback);
         setupServer();
+        stopAdvertising();
         startAdvertising();
     } //onResume
 
@@ -256,6 +260,7 @@ public class ClientActivity extends AppCompatActivity {
                 .build();
 
         mBluetoothLeAdvertiser.startAdvertising(settings,data, scanResponse, mAdvertiseCallback);
+
     }//startAdvertising
 
     //Callback del Advertising
@@ -263,6 +268,7 @@ public class ClientActivity extends AppCompatActivity {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             Log.d(ServerTAG, "Peripheral advertising started.");
+
         }
         @Override
         public void onStartFailure (int errorCode){
@@ -272,11 +278,19 @@ public class ClientActivity extends AppCompatActivity {
 
 
     private void stopAdvertising(){
-        if(mBluetoothLeAdvertiser !=null){
+        if(mBluetoothLeAdvertiser!=null){
             mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
             Log.d(ServerTAG, "Advertising stopped.");
         }
     }
+
+    @Override
+    public void onBackPressed(){
+        stopAdvertising();
+        Intent intent = new Intent(ClientActivity.this, MainActivity.class);
+        startActivity(intent);
+    }
+
 
 
     //Chequeo encendido Bluetooth
@@ -335,8 +349,13 @@ public class ClientActivity extends AppCompatActivity {
         ScanRecord scanRecord = result.getScanRecord();
         manufacturedDataStr="";
         manufacturerData=null;
-        manufacturerData = scanRecord.getManufacturerSpecificData(MANUFACTURED_ID);
-        manufacturedDataStr= new String(manufacturerData);
+        try{
+            manufacturerData = scanRecord.getManufacturerSpecificData(MANUFACTURED_ID);
+            manufacturedDataStr= new String(manufacturerData);
+        }catch (Exception e){
+            return;
+        }
+
         String deviceAddress=device.getAddress();
         String deviceName=device.getName();
         int rssi=result.getRssi();
@@ -372,6 +391,7 @@ public class ClientActivity extends AppCompatActivity {
             Log.d(ClientTAG, "Devices not found.");
             String mensaje= "Devices not found";
             Toast toast =Toast.makeText(this, mensaje, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0,0);
             toast.show();
             arrayList.clear();
             adapter.notifyDataSetChanged();
