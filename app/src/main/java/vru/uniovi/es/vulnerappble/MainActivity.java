@@ -10,10 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
 
     private static final String TAG = "MainActivity";
 
@@ -37,15 +38,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         nextButton = (Button) findViewById(R.id.next_button);
 
         //Se añade función al boton y a las card
-        motoCard.setOnClickListener(this);
-        carCard.setOnClickListener(this);
-        pedesCard.setOnClickListener(this);
-        nextButton.setOnClickListener(this);
+        motoCard.setOnTouchListener(this);
+        carCard.setOnTouchListener(this);
+        pedesCard.setOnTouchListener(this);
+        nextButton.setOnTouchListener(this);
 
-        //Habilitación evento de enfoche en modo táctil
-        carCard.setFocusableInTouchMode(true);
-        pedesCard.setFocusableInTouchMode(true);
-        motoCard.setFocusableInTouchMode(true);
 
      }
 
@@ -71,9 +68,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         UsrType= "0";
     }//onResume
 
-    @Override
-    public void onClick(View w){
 
+    @Override
+    public boolean onTouch(View w, MotionEvent event) {
         switch (w.getId()) {
             case R.id.moto_card:
                 UsrType = "1";
@@ -89,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.next_button:
                 //Intent intentserv = new Intent(MainActivity.this, ServerActivity.class);
+                nextButton.requestFocusFromTouch();
                 if (UsrType.equals("0")) {
                     Snackbar.make(w, "Please choose an option", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -111,6 +109,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
         }
 
-    }//onClick
-
+        return false;
+    }
 }//MainActivity

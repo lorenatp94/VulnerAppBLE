@@ -55,7 +55,7 @@ public class DeviceAdapter extends ArrayAdapter<Device> {
                 break;
             case("3"):
                 imageDevice.setImageResource(R.drawable.ic_directions_walk_black_24dp);
-                imageDevice.setBackgroundResource(R.drawable.circlebackgroundpink);
+                imageDevice.setBackgroundResource(R.drawable.cerclebackgroundblue);
                 break;
             default:
                 System.out.println("Error");

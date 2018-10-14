@@ -14,7 +14,8 @@
     <string name="car">Car</string>
     <string name="walk">Pedestrian</string>
     <string name="messages">Messages</string>
-    <string name="tap">Double tap on the type of user you are and press NEXT</string>
+    <string name="tap">What type of user are you?</string>
+    <string name="scan_results">Near road users:</string>
 
 
     <string name = "serverAd"> Server Address: %s </string>

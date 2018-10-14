@@ -6,7 +6,8 @@
     tools:context="vru.uniovi.es.vulnerappble.ClientActivity"
     android:orientation="horizontal"
     android:gravity="top"
-    android:weightSum="1">
+    android:weightSum="1"
+    android:background="@drawable/border">
 
     <ImageView
         android:id="@+id/device_image"
