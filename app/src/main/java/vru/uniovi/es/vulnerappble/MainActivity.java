@@ -70,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             startActivityForResult(enableBtIntent, 5);
         }
 
+        //Comprobación de que la localización está encendida. Si no,
+        //abre el menú de configuración para activarla.
         locationManager=(LocationManager)getSystemService(Context.LOCATION_SERVICE);
         if ( !locationManager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
             AlertNoGps();
