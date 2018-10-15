@@ -185,6 +185,7 @@ public class ClientActivity extends AppCompatActivity {
                 mProgressBar.setVisibility(View.INVISIBLE); //Se quita la ProgressBar cuando el escaneo está parado
                 run=false; //Se para la StartTask
                 handler.removeCallbacksAndMessages(StartTask);//Eiminación de todos los callbacks y mensajes de StartTask
+                stopScan();
                 scanComplete();
             }
         });

@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         pedesCard.setOnTouchListener(this);
         nextButton.setOnTouchListener(this);
 
-
      }
 
     @Override
@@ -71,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         }
 
         //Comprobación de que la localización está encendida. Si no,
-        //abre el menú de configuración para activarla.
+        //abre el menú de configuración para activarla
         locationManager=(LocationManager)getSystemService(Context.LOCATION_SERVICE);
         if ( !locationManager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
             AlertNoGps();
@@ -113,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     // "Clave/Valor", este objeto tendrá como clave "datos", y su valor
                     // será el tipo de usuario
                     Bundle b = new Bundle();
-                    b.putString("usr", UsrType.toString());
+                    b.putString("usr", UsrType);
                     UsrType="0"; //Para cuando se vueva al menú
 
                     // La clase Intent establece un link entre  MainActivity y la siguiente Activity
@@ -129,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         return false;
     }
 
+
     private void AlertNoGps() {
         AlertDialog alert;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 .setPositiveButton("Accept", new DialogInterface.OnClickListener() {
                     public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
                         startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        dialog.cancel();
 
                     }
                 })
@@ -148,4 +149,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         alert = builder.create();
         alert.show();
     }
+
+
 }//MainActivity

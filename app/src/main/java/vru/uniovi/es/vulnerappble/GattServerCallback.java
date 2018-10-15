@@ -3,32 +3,22 @@ package vru.uniovi.es.vulnerappble;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothProfile;
-import android.widget.ArrayAdapter;
+import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.Map;
 
 //Clase para añadir o quitar servicioss de la lista
 public class GattServerCallback extends BluetoothGattServerCallback {
-    public Map<BluetoothDevice, String> mScanResults;
-    private ArrayList<String> arrayList;
-    private ArrayAdapter<String> adapter;
-
+    private static final String GattServerTAG = "GattServer";
 
     @Override
     public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
         super.onConnectionStateChange(device, status, newState);
 
-
         if (newState == BluetoothProfile.STATE_CONNECTED) {
-            //mScanResults.put(device, deviceAddress);
+            Log.e(GattServerTAG, "GattServer Connected" );
 
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            //mScanResults.remove(deviceAddress);
-
-
+            Log.e(GattServerTAG, "GattServer Disconnected" );
         }
     }
-
-
 }
