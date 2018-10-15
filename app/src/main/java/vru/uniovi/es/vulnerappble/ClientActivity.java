@@ -49,9 +49,9 @@ public class ClientActivity extends AppCompatActivity {
     private static final String ServerTAG = "Server";
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int MANUFACTURED_ID = 65535;
-    public  final String MOTO= "1";
-    public  final String CAR= "2";
-    public  final String PED= "3";
+    public static final String MOTO= "1";
+    public static final String CAR= "2";
+    public static final String PED= "3";
 
     //public static String SERVICE_STRING = "00001811-0000-1000-8000-0080F9B34FB";
     public static String SERVICE_STRING = "795090c7-420d-4048-a24e-18e60180e23c";
@@ -121,13 +121,16 @@ public class ClientActivity extends AppCompatActivity {
             UsrType = bundleClient.getString("usr");// TextView a partir de la cadena de texto del Bundle.
             switch (UsrType) {
                 case MOTO:
-                    userType.setText("User type: Motorist/Cyclist"+'\n'+"Name: "+ deviceUsrName);
+                    userType.setText("User Type: Motorist/Cyclist"+'\n'+"Name: "+ deviceUsrName);
+                    //userType.setText(getString(R.string.userDisplay, R.string.moto, deviceUsrName));
                     break;
                 case CAR:
                     userType.setText("User type: Car"+'\n'+"Name: "+ deviceUsrName);
+
                     break;
                 case PED:
                     userType.setText("User type: Pedestrian"+'\n'+"Name: "+ deviceUsrName);
+
                     break;
                 default:
                     System.out.println("Error");

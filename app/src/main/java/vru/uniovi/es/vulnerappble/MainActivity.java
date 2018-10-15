@@ -3,9 +3,12 @@ package vru.uniovi.es.vulnerappble;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -22,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private Button nextButton;
     private BluetoothAdapter mBluetoothAdapter;
     public String UsrType;
+    public LocationManager locationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +69,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, 5);
         }
+
+        locationManager=(LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        if ( !locationManager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+            AlertNoGps();
+        }
+
         UsrType= "0";
+
     }//onResume
 
 
@@ -85,12 +96,16 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 break;
 
             case R.id.next_button:
-                //Intent intentserv = new Intent(MainActivity.this, ServerActivity.class);
                 nextButton.requestFocusFromTouch();
                 if (UsrType.equals("0")) {
                     Snackbar.make(w, "Please choose an option", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
-                } else {
+                }
+                else if (!locationManager.isProviderEnabled( LocationManager.GPS_PROVIDER )){
+                    Snackbar.make(w, "Please turn on the location service", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+
+                }else {
 
                     // Utilizamos un objeto de la clase Bundle para incluir un par
                     // "Clave/Valor", este objeto tendrá como clave "datos", y su valor
@@ -110,5 +125,25 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         }
 
         return false;
+    }
+
+    private void AlertNoGps() {
+        AlertDialog alert;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("To continue, turn on device location")
+                .setCancelable(false)
+                .setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+                    public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        dialog.cancel();
+                    }
+                });
+        alert = builder.create();
+        alert.show();
     }
 }//MainActivity

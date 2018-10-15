@@ -13,7 +13,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
+import static vru.uniovi.es.vulnerappble.ClientActivity.MOTO;
+import static vru.uniovi.es.vulnerappble.ClientActivity.CAR;
+import static vru.uniovi.es.vulnerappble.ClientActivity.PED;
 
 public class DeviceAdapter extends ArrayAdapter<Device> {
     private ArrayList<Device> deviceList;
@@ -45,15 +47,15 @@ public class DeviceAdapter extends ArrayAdapter<Device> {
         String  user= deviceList.get(position).getuType();
 
         switch(user){
-            case ("1"):
+            case (MOTO):
                 imageDevice.setImageResource(R.drawable.ic_directions_bike_black_24dp);
                 imageDevice.setBackgroundResource(R.drawable.cerclebackgroundpurple);
                 break;
-            case ("2"):
+            case (CAR):
                 imageDevice.setImageResource(R.drawable.ic_directions_car_black_24dp);
                 imageDevice.setBackgroundResource(R.drawable.cerclebackgroundgreen);
                 break;
-            case("3"):
+            case(PED):
                 imageDevice.setImageResource(R.drawable.ic_directions_walk_black_24dp);
                 imageDevice.setBackgroundResource(R.drawable.cerclebackgroundblue);
                 break;
