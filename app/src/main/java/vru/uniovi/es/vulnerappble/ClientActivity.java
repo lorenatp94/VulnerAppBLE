@@ -24,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -60,11 +61,11 @@ public class ClientActivity extends AppCompatActivity {
 
 
     private TextView userType;
+    public  static TextView total;
     public String UsrType;
     private ListView deviceList;
     public static ArrayList<Device> arrayList;
     public static ArrayAdapter adapter;
-    private FloatingActionButton mapButton;
     private Button startButton, stopButton, clearButton;
     private boolean mScanning;
 
@@ -95,7 +96,9 @@ public class ClientActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.mipmap.ic_launcher_round);
 
-        userType = (TextView) findViewById(R.id.userType); //Texto con tipo de usuario
+        userType = (TextView) findViewById(R.id.userType); //Para mostrar el tipo de usuario escogido en el Main
+        total=(TextView)findViewById(R.id.total);//Para mostrar el número de dispositivos encontrados
+
         mProgressBar = (ProgressBar) findViewById(R.id.progressbar); //ProgressBar
         mProgressBar.setVisibility(View.INVISIBLE); //ProgressBar invisibe hasta que no se empiece a escanear
 
@@ -140,15 +143,7 @@ public class ClientActivity extends AppCompatActivity {
 
 
         //Botones
-        mapButton = (FloatingActionButton) findViewById(R.id.fab);
-        mapButton.setFocusableInTouchMode(true);
-        mapButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ClientActivity.this, MapsActivity.class);
-                startActivity(intent);
-            }
-        });
+
         startButton= (Button) findViewById(R.id.start_scanning_button);
         startButton.setFocusableInTouchMode(true);
         final Handler handler=new Handler();
@@ -166,36 +161,40 @@ public class ClientActivity extends AppCompatActivity {
             }
         };//StartTask
 
-        //Se lanza la tarea al hacer click en el botón START
-        startButton.setOnClickListener(new View.OnClickListener() {
+        startButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
+            public boolean onTouch(View v, MotionEvent event) {
+                v.performClick();
                 run=true;
                 startScan();
                 handler.post(StartTask);
-
+                return false;
             }
         });
 
         stopButton= (Button) findViewById(R.id.stop_scanning_button);
         stopButton.setFocusableInTouchMode(true);
-        stopButton.setOnClickListener(new View.OnClickListener() {
+        stopButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
+            public boolean onTouch(View v, MotionEvent event) {
+                v.performClick();
                 mProgressBar.setVisibility(View.INVISIBLE); //Se quita la ProgressBar cuando el escaneo está parado
                 run=false; //Se para la StartTask
-                handler.removeCallbacksAndMessages(StartTask);//Eiminación de todos los callbacks y mensajes de StartTask
+                handler.removeCallbacksAndMessages(StartTask);//Eliminación de todos los callbacks y mensajes de StartTask
                 stopScan();
                 scanComplete();
+                return false;
             }
         });
 
         clearButton= (Button) findViewById(R.id.clear_scanning_button);
         clearButton.setFocusableInTouchMode(true);
-        clearButton.setOnClickListener(new View.OnClickListener() {
+        clearButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
+            public boolean onTouch(View v, MotionEvent event) {
+                v.performClick();
                 clearList();
+                return false;
             }
         });
 
@@ -205,6 +204,7 @@ public class ClientActivity extends AppCompatActivity {
 
     public void onResume() {
         super.onResume();
+
         //Chequeo de que el Advertising es compatible con el hardware del dispositivo
         if(!mBluetoothAdapter.isMultipleAdvertisementSupported()){
             Log.d(ServerTAG, "No ad suppported.");
@@ -213,15 +213,12 @@ public class ClientActivity extends AppCompatActivity {
         }
         Log.d(ServerTAG, "Ad suppported.");
 
-
-
-
         //Acceso al Advertiser
         mBluetoothLeAdvertiser=mBluetoothAdapter.getBluetoothLeAdvertiser();
         GattServerCallback gattServerCallback = new GattServerCallback();
         mGattServer = mBluetoothManager.openGattServer(this, gattServerCallback);
-        setupServer();
-        stopAdvertising();
+        //setupServer();
+        //stopAdvertising();
         startAdvertising();
     } //onResume
 
@@ -239,15 +236,15 @@ public class ClientActivity extends AppCompatActivity {
         }
 
         AdvertiseSettings settings =new AdvertiseSettings.Builder()
-                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
-                .setConnectable(true)
+                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+                .setConnectable(false)
                 .setTimeout(0)
                 .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                 .build();
-        //Balanced Advertise para que sea rápidamente detectable pero no consuma tanta energía como Low Latency
-        //Connectable true porque queremos pasar datos en ambos sentidos no como una baliza.
-        //Timeout a 0 para anunciarse siempre
-        //High Level para mayor rango de visibilidad del paquete publicitario
+        //Balanced Advertise para que sea rápidamente detectable pero no consuma tanta energía como Low Latency.
+        //Connectable false el dispositivo solo va a anunciarse, no necesita establecer conexiones.
+        //Timeout a 0 para anunciarse siempre.
+        //High Level para mayor rango de visibilidad del paquete de Advertising.
 
         byte[] userData;
         //ParcelUuid parcelUuid= new ParcelUuid(SERVICE_UUID);
@@ -324,6 +321,7 @@ public class ClientActivity extends AppCompatActivity {
 
         mScanResults.clear();
         arrayList.clear();
+        total.setText(null);
         adapter.notifyDataSetChanged();
         List<ScanFilter> filters = new ArrayList<>();
         //Añadimos filtro para el UUID del servicio de servidor Gatt
@@ -371,8 +369,8 @@ public class ClientActivity extends AppCompatActivity {
             arrayList.add(disp);
             Log.d(ClientTAG, "Device: "+ deviceName+ " RSSI: "+ result.getRssi());
             Log.d(ClientTAG, "Usertype: "+ manufacturedDataStr);
-
             adapter.notifyDataSetChanged();
+            total.setText("Found users: "+ mScanResults.size());
         }
     }//addScanResult
 
@@ -405,10 +403,10 @@ public class ClientActivity extends AppCompatActivity {
 
     private void clearList(){
         //Función del botón Clear
-
         mScanResults.clear();
         arrayList.clear();
         adapter.notifyDataSetChanged();
+        total.setText(null);
     }
 
 }//ClientActivity

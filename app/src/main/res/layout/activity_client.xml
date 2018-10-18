@@ -47,14 +47,25 @@
             android:textStyle="bold"
             android:layout_weight="1"/>
 
-        <ProgressBar
-            android:id="@+id/progressbar"
-            android:layout_width="match_parent"
-            android:layout_height="51dp" />
+    <ProgressBar
+        android:id="@+id/progressbar"
+        android:layout_width="match_parent"
+        android:layout_height="51dp" />
+
+    <TextView
+        android:id="@+id/total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="3dp"
+        android:paddingEnd="3dp"
+        android:textAlignment="textStart"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="194dp"
+        android:layout_height="160dp"
         android:clipToPadding="false"
         android:gravity="center"
         android:orientation="vertical">
@@ -72,59 +83,55 @@
                 android:layout_weight="1"
                 android:background="@drawable/button"
                 android:text="@string/action_start"
-                android:textColor="@color/cardview_light_background" />
+                android:textColor="@color/cardview_light_background"
+                style="@style/Base.TextAppearance.AppCompat.Widget.Button.Borderless.Colored"/>
 
             <Button
                 android:id="@+id/stop_scanning_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginEnd="1dp"
+                android:layout_weight="1"
                 android:background="@drawable/button"
                 android:text="@string/action_stop"
-                android:textColor="@color/cardview_light_background" />
+                android:textColor="@color/cardview_light_background"
+                style="@style/Base.TextAppearance.AppCompat.Widget.Button.Borderless.Colored"/>
 
             <Button
                 android:id="@+id/clear_scanning_button"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/button"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:text="@string/action_clear"
-                android:textColor="@color/cardview_light_background" />
+                android:textColor="@color/cardview_light_background"
+                style="@style/Base.TextAppearance.AppCompat.Widget.Button.Borderless.Colored"/>
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="85dp"
             android:clipToPadding="false"
-            android:paddingTop="15dp"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingTop="15dp">
 
             <TextView
                 android:id="@+id/userType"
                 android:layout_width="260dp"
                 android:layout_height="60dp"
+                android:layout_marginStart="3dp"
                 android:background="@drawable/border"
                 android:paddingStart="15dp"
+                android:paddingEnd="15dp"
                 android:paddingTop="10dp"
                 android:textColor="@color/colorAccent"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_gravity="bottom|end|center_horizontal|end"
-                android:layout_margin="10dp"
-                android:layout_marginBottom="10dp"
-                android:src="@drawable/ic_pin_drop_black_24dp" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

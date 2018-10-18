@@ -13,6 +13,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Locale;
+
 import static vru.uniovi.es.vulnerappble.ClientActivity.MOTO;
 import static vru.uniovi.es.vulnerappble.ClientActivity.CAR;
 import static vru.uniovi.es.vulnerappble.ClientActivity.PED;
@@ -30,21 +32,26 @@ public class DeviceAdapter extends ArrayAdapter<Device> {
     }
 
     @Override
-    public View getView (int position, View convertView, ViewGroup parent){
+    public View getView (int position, View convertView, @NonNull ViewGroup parent){
         LayoutInflater inflater = (LayoutInflater) app.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
         View item= inflater.inflate(R.layout.list_item, null);
 
-        TextView textView1 = (TextView)item.findViewById(R.id.device_name);
-        textView1.setText(deviceList.get(position).getDeviceName());
+        TextView deviceName = (TextView)item.findViewById(R.id.device_name);
+        deviceName.setText(deviceList.get(position).getDeviceName());
 
-        TextView textView2 = (TextView)item.findViewById(R.id.device_address);
-        textView2.setText(deviceList.get(position).getDeviceAddress());
+        TextView deviceAddress = (TextView)item.findViewById(R.id.device_address);
+        deviceAddress.setText(deviceList.get(position).getDeviceAddress());
 
-        TextView textView3 = (TextView)item.findViewById(R.id.device_rssi);
-        textView3.setText(Integer.toString(deviceList.get(position).getRssi()));
+        TextView deviceRssi = (TextView)item.findViewById(R.id.device_rssi);
+        //deviceRssi.setText(Integer.toString(deviceList.get(position).getRssi()));
+        deviceRssi.setText(String.format(Locale.ENGLISH,"%d", deviceList.get(position).getRssi()));
 
         ImageView imageDevice = (ImageView)item.findViewById(R.id.device_image);
         String  user= deviceList.get(position).getuType();
+        int Rssi= deviceList.get(position).getRssi();
+
+        ImageView nearablyColor = (ImageView)item.findViewById(R.id.nearably);
+
 
         switch(user){
             case (MOTO):
@@ -61,6 +68,13 @@ public class DeviceAdapter extends ArrayAdapter<Device> {
                 break;
             default:
                 System.out.println("Error");
+        }
+
+        if(Rssi>=-50){
+            nearablyColor.setImageResource(R.drawable.mostdanger);
+        }
+        if(Rssi<-50){
+            nearablyColor.setImageResource(R.drawable.danger);
         }
 
         return(item);
