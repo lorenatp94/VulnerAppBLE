@@ -1,24 +1,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/white"
-    android:gravity="top"
+    android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/white"
     tools:context="vru.uniovi.es.vulnerappble.MainActivity">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="top|bottom|center"
+        android:layout_marginStart="80dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="5dp"
         android:text="@string/tap"
-        android:textSize="17sp"
+        android:textColor="@color/colorAccent"
+        android:textSize="20sp"
         android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="0dp"
         android:clipToPadding="false"
         android:gravity="center|end"
         android:orientation="horizontal">
@@ -26,132 +29,77 @@
         <LinearLayout
             android:layout_width="408dp"
             android:layout_height="292dp"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="20dp"
             android:clipToPadding="false"
-            android:gravity="center|end"
+            android:gravity="top|center_vertical|center|end"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="408dp"
-                android:layout_height="114dp"
-                android:layout_marginTop="5dp"
-                android:clipToPadding="false"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="408dp"
-                    android:layout_height="114dp"
-                    android:layout_marginTop="5dp"
-                    android:clipToPadding="false"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <android.support.v7.widget.CardView
-                        android:id="@+id/moto_card"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
-                        android:layout_margin="10dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?android:attr/selectableItemBackground">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@color/white"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <ImageView
-                                android:layout_width="64dp"
-                                android:layout_height="64dp"
-                                android:layout_marginTop="15dp"
-                                android:background="@drawable/cerclebackgroundpurple"
-                                android:contentDescription="@null"
-                                android:padding="10dp"
-                                android:src="@drawable/ic_directions_bike_black_24dp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="10dp"
-                                android:text="@string/moto"
-                                android:textStyle="bold" />
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_margin="10dp"
-                                android:background="@color/white" />
-
-                        </LinearLayout>
-                    </android.support.v7.widget.CardView>
-
-                    <android.support.v7.widget.CardView
-                        android:id="@+id/car_card"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
-                        android:layout_margin="10dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?android:attr/selectableItemBackground">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@color/white"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <ImageView
-                                android:layout_width="64dp"
-                                android:layout_height="64dp"
-                                android:layout_marginTop="15dp"
-                                android:background="@drawable/cerclebackgroundgreen"
-                                android:contentDescription="@null"
-                                android:padding="10dp"
-                                android:src="@drawable/ic_directions_car_black_24dp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="10dp"
-                                android:text="@string/car"
-                                android:textStyle="bold" />
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_margin="10dp"
-                                android:background="@color/white" />
-
-                        </LinearLayout>
-                    </android.support.v7.widget.CardView>
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="120dp"
                 android:clipToPadding="false"
                 android:gravity="center"
                 android:orientation="horizontal">
 
                 <android.support.v7.widget.CardView
-                    android:id="@+id/pedes_card"
-                    android:layout_width="173dp"
-                    android:layout_height="120dp"
-                    android:layout_margin="10dp"
+                    android:id="@+id/moto_card"
+                    android:layout_width="120dp"
+                    android:layout_height="110dp"
+                    android:layout_margin="9dp"
                     android:clickable="true"
                     android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    app:cardBackgroundColor="@color/backgroundcolor"
+                    tools:background="@color/backgroundcolor">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/border"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/moto_view"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:layout_marginTop="15dp"
+                            android:background="@drawable/cerclebackgroundpurple"
+                            android:contentDescription="@null"
+                            android:padding="10dp"
+                            android:src="@drawable/ic_directions_bike_black_24dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="@string/moto"
+                            android:textStyle="bold" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_margin="10dp"
+                            android:background="@color/white" />
+
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+
+                <android.support.v7.widget.CardView
+                    android:id="@+id/car_card"
+                    android:layout_width="120dp"
+                    android:layout_height="110dp"
+                    android:layout_marginStart="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:foreground="?android:attr/selectableItemBackground">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@color/white"
+                        android:background="@drawable/border"
                         android:gravity="center"
                         android:orientation="vertical">
 
@@ -159,10 +107,64 @@
                             android:layout_width="64dp"
                             android:layout_height="64dp"
                             android:layout_marginTop="15dp"
-                            android:background="@drawable/circlebackgroundpink"
+                            android:background="@drawable/cerclebackgroundgreen"
                             android:contentDescription="@null"
                             android:padding="10dp"
-                            android:src="@drawable/ic_directions_walk_black_24dp" />
+                            android:src="@drawable/ic_directions_car_black_24dp"
+                            tools:id="@+id/car_view" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="@string/car"
+                            android:textStyle="bold" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_margin="10dp"
+                            android:background="@color/white" />
+
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginTop="5dp"
+                android:clipToPadding="false"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <android.support.v7.widget.CardView
+                    android:id="@+id/pedes_card"
+                    android:layout_width="257dp"
+                    android:layout_height="110dp"
+                    android:layout_marginStart="9dp"
+                    android:layout_marginTop="0dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/border"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:layout_marginTop="15dp"
+                            android:background="@drawable/cerclebackgroundblue"
+                            android:contentDescription="@null"
+                            android:padding="10dp"
+                            android:src="@drawable/ic_directions_walk_black_24dp"
+                            tools:id="@+id/pedestrian_view" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -180,28 +182,27 @@
                     </LinearLayout>
                 </android.support.v7.widget.CardView>
             </LinearLayout>
-
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="184dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:clipToPadding="false"
-            android:gravity="center"
+            android:gravity="end"
             android:orientation="vertical">
 
             <Button
                 android:id="@+id/next_button"
-                android:layout_width="132dp"
+                android:layout_width="114dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start|center"
-                android:layout_marginTop="0dp"
-                android:background="@color/colorPrimary"
+                android:background="@drawable/button"
                 android:text="@string/action_next"
                 android:textColor="@color/white"
+                android:textSize="20sp"
                 android:textStyle="bold" />
+
 
         </LinearLayout>
     </LinearLayout>
-
 </LinearLayout>

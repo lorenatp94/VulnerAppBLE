@@ -164,7 +164,6 @@ public class ClientActivity extends AppCompatActivity {
         startButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                v.performClick();
                 run=true;
                 startScan();
                 handler.post(StartTask);
@@ -177,7 +176,6 @@ public class ClientActivity extends AppCompatActivity {
         stopButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                v.performClick();
                 mProgressBar.setVisibility(View.INVISIBLE); //Se quita la ProgressBar cuando el escaneo está parado
                 run=false; //Se para la StartTask
                 handler.removeCallbacksAndMessages(StartTask);//Eliminación de todos los callbacks y mensajes de StartTask
@@ -192,7 +190,6 @@ public class ClientActivity extends AppCompatActivity {
         clearButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                v.performClick();
                 clearList();
                 return false;
             }
