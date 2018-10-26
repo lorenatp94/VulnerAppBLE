@@ -1,5 +1,6 @@
 package vru.uniovi.es.vulnerappble;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattServer;
@@ -17,15 +18,21 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.ParcelUuid;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -34,6 +41,10 @@ import android.widget.TextView;
 import android.os.Handler;
 import android.widget.Toast;
 
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,6 +77,7 @@ public class ClientActivity extends AppCompatActivity {
     private ListView deviceList;
     public static ArrayList<Device> arrayList;
     public static ArrayAdapter adapter;
+    private FloatingActionButton mapButton;
     private Button startButton, stopButton, clearButton;
     private boolean mScanning;
 
@@ -91,24 +103,21 @@ public class ClientActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client);
 
-
         //Icono en ActionBar
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.mipmap.ic_launcher_round);
 
         userType = (TextView) findViewById(R.id.userType); //Para mostrar el tipo de usuario escogido en el Main
         total=(TextView)findViewById(R.id.total);//Para mostrar el número de dispositivos encontrados
-
         mProgressBar = (ProgressBar) findViewById(R.id.progressbar); //ProgressBar
         mProgressBar.setVisibility(View.INVISIBLE); //ProgressBar invisibe hasta que no se empiece a escanear
+        mScanResults=new HashMap<>();//Mapa para guardar los resutados del escaneo
+        mScanCallback = new BleScanCallback();//Callback para manejar los resultados
 
         //Inicialización del adaptador entre el arrayList y el ListView
         arrayList=new ArrayList<>();
         adapter=new DeviceAdapter(this, R.layout.list_item, arrayList);
-
-        mScanResults=new HashMap<>();
-        mScanCallback = new BleScanCallback();
-        deviceList= (ListView) findViewById(R.id.deviceList); //Lista de dispositivos
+        deviceList= (ListView) findViewById(R.id.deviceList);
         deviceList.setAdapter(adapter);
 
         //Inicialización adaptador Bluetooth
@@ -116,8 +125,7 @@ public class ClientActivity extends AppCompatActivity {
         mBluetoothAdapter = mBluetoothManager.getAdapter();
         String deviceUsrName= mBluetoothAdapter.getName();
 
-
-        //Establecer el tipo de usuario escogido en el Main
+        //Establecer y mostrar el tipo de usuario escogido en el Main
         Intent intentClient= getIntent();//Sacamos el intent con el que se inició la activity
         Bundle bundleClient =intentClient.getExtras();//Del intent sacamos el bundle
         if (bundleClient != null) {
@@ -138,7 +146,6 @@ public class ClientActivity extends AppCompatActivity {
                 default:
                     System.out.println("Error");
             }//switch
-
         }//if
 
 
@@ -195,7 +202,44 @@ public class ClientActivity extends AppCompatActivity {
             }
         });
 
+        mapButton = (FloatingActionButton) findViewById(R.id.fab);
+        mapButton.setFocusableInTouchMode(true);
+        mapButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Intent intent = new Intent(ClientActivity.this, MapsActivity.class);
+                startActivity(intent);
+                return false;
+            }
+        });
 
+        // Se debe adquirir una referencia al Location Manager del sistema
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+
+        // Se crea un listener de la clase que se va a definir luego
+        ClientActivity.MyLocationListener locationListener = new ClientActivity.MyLocationListener();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Se registra el listener con el Location Manager para recibir actualizaciones
+            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 0, 2, locationListener);
+
+
+            try {
+                //Se obtiene la posición
+                Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+                if (location != null) {
+                    double lati = location.getLatitude();
+                    double longi = location.getLongitude();
+                    LatLng myPosition = new LatLng(lati, longi);
+
+                } else {
+
+                }
+
+            } catch (Exception e) {
+            }
+
+        }
 
     }//OnCreate
 
@@ -214,17 +258,9 @@ public class ClientActivity extends AppCompatActivity {
         mBluetoothLeAdvertiser=mBluetoothAdapter.getBluetoothLeAdvertiser();
         GattServerCallback gattServerCallback = new GattServerCallback();
         mGattServer = mBluetoothManager.openGattServer(this, gattServerCallback);
-        //setupServer();
-        //stopAdvertising();
         startAdvertising();
     } //onResume
 
-    //Se añade el Servicio al Servidor
-    //SERVICE_UUID es un identificador unico que asegura que se está conectando al servidor Gatt correcto.
-    private void setupServer(){
-        BluetoothGattService service = new BluetoothGattService(SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
-        mGattServer.addService(service);
-    }
 
     //Configuración del Advertising del servidor Gatt
     private void startAdvertising(){
@@ -233,7 +269,7 @@ public class ClientActivity extends AppCompatActivity {
         }
 
         AdvertiseSettings settings =new AdvertiseSettings.Builder()
-                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                 .setConnectable(false)
                 .setTimeout(0)
                 .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
@@ -244,17 +280,15 @@ public class ClientActivity extends AppCompatActivity {
         //High Level para mayor rango de visibilidad del paquete de Advertising.
 
         byte[] userData;
-        //ParcelUuid parcelUuid= new ParcelUuid(SERVICE_UUID);
         userData = UsrType.getBytes();
 
         AdvertiseData data =new AdvertiseData.Builder()
-                .addManufacturerData(65535, userData)
-               // .addServiceData(parcelUuid,userData)
+                .addManufacturerData(65535, userData)//Se incluye el tipo de usuario en el Advertising
                 .setIncludeTxPowerLevel(true) //Se incluye el nivel de transmision para luego calcular la posicion
                 .build();
 
         AdvertiseData scanResponse =new AdvertiseData.Builder()
-                .setIncludeDeviceName(true)  //Incluir el nombre del dispositivo hace que sea más fácil de identificar el servidor
+                .setIncludeDeviceName(true)  //Se incluye el nombre del dispositivo hace que sea más fácil de identificar el servidor
                 .build();
 
         mBluetoothLeAdvertiser.startAdvertising(settings,data, scanResponse, mAdvertiseCallback);
@@ -266,7 +300,6 @@ public class ClientActivity extends AppCompatActivity {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             Log.d(ServerTAG, "Peripheral advertising started.");
-
         }
         @Override
         public void onStartFailure (int errorCode){
@@ -274,7 +307,7 @@ public class ClientActivity extends AppCompatActivity {
         }
     };
 
-
+    //Parada del escaneo
     private void stopAdvertising(){
         if(mBluetoothLeAdvertiser!=null){
             mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
@@ -282,14 +315,13 @@ public class ClientActivity extends AppCompatActivity {
         }
     }
 
+    //Cuando se vuelve al Main y para escoger de nuevo el tipo de usuario
     @Override
     public void onBackPressed(){
-        stopAdvertising();
+        stopAdvertising();//Se para el Advertising
         Intent intent = new Intent(ClientActivity.this, MainActivity.class);
         startActivity(intent);
     }
-
-
 
     //Chequeo encendido Bluetooth
     private boolean hasPermissions() {
@@ -311,26 +343,19 @@ public class ClientActivity extends AppCompatActivity {
 
     //Inicialización del escaneo
     public void startScan(){
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (!hasPermissions() || mScanning) {
             return;
         }
         mProgressBar.setVisibility(View.VISIBLE); //ProgressBar visible
-
         mScanResults.clear();
         arrayList.clear();
         total.setText(null);
         adapter.notifyDataSetChanged();
         List<ScanFilter> filters = new ArrayList<>();
-        //Añadimos filtro para el UUID del servicio de servidor Gatt
-        ScanFilter scanFilter = new ScanFilter.Builder()
-                .setServiceUuid(new ParcelUuid(SERVICE_UUID))
-                .build();
-        //filters.add(scanFilter);
         ScanSettings settings =new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
-
-
 
         //BluetoothLeScanner inicia el escaneo. Devuelve los resultados en mScanCallback
         mBluetoothLeScanner  = mBluetoothAdapter.getBluetoothLeScanner();
@@ -341,7 +366,7 @@ public class ClientActivity extends AppCompatActivity {
 
     }//startScan
 
-
+    //Función para añadir un nuevo dispositivo en la lista y mostrarlo por pantalla
     public static void addScanResult(ScanResult result) {
 
         BluetoothDevice device = result.getDevice();
@@ -360,7 +385,6 @@ public class ClientActivity extends AppCompatActivity {
         int rssi=result.getRssi();
         Device disp = new Device(deviceName, deviceAddress,manufacturedDataStr , rssi);
 
-
         if (!mScanResults.containsValue(deviceAddress)){
             mScanResults.put(disp, deviceAddress);
             arrayList.add(disp);
@@ -374,18 +398,15 @@ public class ClientActivity extends AppCompatActivity {
 
     //Parada del escaneo
     public void stopScan(){
-        //Se limpian variables relacionadas con el escaneo
-        //mScanCallback = null;
-
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mScanning = false;
         mBluetoothLeScanner.stopScan(mScanCallback);
         Log.d(ClientTAG, "Stopped scanning.");
 
     }//stopScan
 
-    public void scanComplete() {
     //Si no hay dispositivos se saca mensaje informando
-
+    public void scanComplete() {
         if (mScanResults.isEmpty()) {
             Log.d(ClientTAG, "Devices not found.");
             String mensaje= "Devices not found";
@@ -397,13 +418,36 @@ public class ClientActivity extends AppCompatActivity {
         }
     }//scanComplete
 
-
+    //Función del botón Clear
     private void clearList(){
-        //Función del botón Clear
         mScanResults.clear();
         arrayList.clear();
         adapter.notifyDataSetChanged();
         total.setText(null);
+    }//clearList
+
+    public class MyLocationListener implements LocationListener {
+        @Override
+        public void onLocationChanged(Location location)
+        {
+            double lati = location.getLatitude();
+            double longi = location.getLongitude();
+            LatLng myPosition = new LatLng(lati, longi);
+
+        }
+
+        // Se llama cuando cambia el estado
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+        // Se llama cuando se activa el provider
+        @Override
+        public void onProviderEnabled(String provider) {}
+
+        // Se llama cuando se desactiva el provider
+        @Override
+        public void onProviderDisabled(String provider) {}
+
     }
 
 }//ClientActivity

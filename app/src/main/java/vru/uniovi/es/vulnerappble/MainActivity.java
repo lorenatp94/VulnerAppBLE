@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         pedesCard.setOnTouchListener(this);
         nextButton.setOnTouchListener(this);
 
-     }
+     }//onCreate
 
     @Override
     public void onResume(){
@@ -114,13 +114,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     Bundle b = new Bundle();
                     b.putString("usr", UsrType);
                     UsrType="0"; //Para cuando se vueva al menú
-
-                    // La clase Intent establece un link entre  MainActivity y la siguiente Activity
-                    // que queremos lanzar, para ello al instanciar el Intent
-                    // introducimos como parámetros esta propia Activity, y la clase que
-                    // representa a la nueva Activity.
                     Intent intent = new Intent(MainActivity.this, ClientActivity.class);
-                    intent.putExtras(b);
+                    intent.putExtras(b);//Se pasa el tipo de usuario a la siguiente Actividad
                     startActivity(intent);
                 }
         }
@@ -128,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         return false;
     }
 
-
+    //Cuandro de diálogo que aparece cuando la localización no está encendida y permite habilitarla
     private void AlertNoGps() {
         AlertDialog alert;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -148,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 });
         alert = builder.create();
         alert.show();
-    }
 
+    }//AlertNoGps
 
 }//MainActivity

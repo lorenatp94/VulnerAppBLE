@@ -16,11 +16,10 @@
     <string name="messages">Messages</string>
     <string name="tap">What type of user are you?</string>
     <string name="scan_results"><u>Near road users:</u></string>
-    <string name= "total"><u>Total devices : %d</u></string>
+    <string name="total"><u>Total devices : %d</u></string>
     <string name="userDisplay">User type: %1$h \nName: %2$s</string>
     <string name="deviceImage">Type of user image</string>
     <string name="nearImage">Signal that indicates if the device is near or very near</string>
-
 
 
     <!-- Logs -->

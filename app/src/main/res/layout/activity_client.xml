@@ -121,16 +121,25 @@
 
             <TextView
                 android:id="@+id/userType"
-                android:layout_width="260dp"
+                android:layout_width="301dp"
                 android:layout_height="60dp"
                 android:layout_marginStart="3dp"
                 android:background="@drawable/border"
-                android:paddingStart="15dp"
                 android:paddingEnd="15dp"
+                android:paddingStart="15dp"
                 android:paddingTop="10dp"
                 android:textColor="@color/colorAccent"
                 android:textSize="15sp"
                 android:textStyle="bold" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="bottom|end|center_horizontal|end"
+                android:layout_margin="10dp"
+                android:layout_marginBottom="10dp"
+                android:src="@drawable/ic_place_black_24dp" />
 
         </LinearLayout>
     </LinearLayout>
